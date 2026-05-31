@@ -1,0 +1,3127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Plushie Builder 🧸</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    /* ── RESET & TOKENS ── */
+    html { font-size: 21px; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blush:    #ffd6e7;
+      --blush-dk: #f4a7c0;
+      --mint:     #c8f0e0;
+      --mint-dk:  #8ed8bb;
+      --lavender: #e4d4f8;
+      --lav-dk:   #c0a0e8;
+      --butter:   #fff4c2;
+      --peach:    #ffe0c8;
+      --peach-dk: #f5b88a;
+      --text:     #5c3d52;
+      --text-mid: #8b6878;
+      --text-lt:  #b89aaa;
+      --panel-bg: #fffafd;
+      --border:   #f0ddf0;
+      --shadow:   0 6px 32px rgba(180,120,160,0.13);
+      --shadow-lg:0 10px 48px rgba(160,100,140,0.18);
+      --radius-sm: 14px;
+      --radius-md: 20px;
+      --radius-lg: 28px;
+      --radius-pill: 999px;
+    }
+
+    @keyframes pop-in {
+      0%   { transform: scale(0.92); opacity: 0; }
+      100% { transform: scale(1);    opacity: 1; }
+    }
+    @keyframes bounce-hover {
+      0%,100% { transform: scale(1.05); }
+      50%      { transform: scale(1.09); }
+    }
+
+    body {
+      font-family: 'Baloo 2', 'Segoe UI', system-ui, sans-serif;
+      background: linear-gradient(145deg, #fff0f8 0%, #f0e8ff 50%, #e8f8f4 100%);
+      overflow: hidden;
+      color: var(--text);
+      width: 100vw; height: 100vh;
+    }
+
+    /* ── SCREEN SYSTEM ── */
+    .screen {
+      position: fixed; inset: 0;
+      display: none;
+      width: 100%; height: 100%;
+    }
+    .screen.active { display: flex; z-index: 500; }
+    #editor-view.active { display: grid; z-index: 0; } /* editor sits below the home button */
+
+    /* ── HOMEPAGE ── */
+    @keyframes float-a { 0%,100%{transform:translateY(0) rotate(-2deg)} 50%{transform:translateY(-10px) rotate(2deg)} }
+    @keyframes float-b { 0%,100%{transform:translateY(0) rotate(3deg)} 50%{transform:translateY(-13px) rotate(-1deg)} }
+    @keyframes float-c { 0%,100%{transform:translateY(0) rotate(-1deg)} 50%{transform:translateY(-8px) rotate(3deg)} }
+    @keyframes float-d { 0%,100%{transform:translateY(0) rotate(2deg)} 50%{transform:translateY(-11px) rotate(-3deg)} }
+
+    #homepage {
+      align-items: center; justify-content: center;
+      background: linear-gradient(145deg, #fff0f8 0%, #f0e8ff 55%, #e8f8f4 100%);
+      overflow: hidden;
+      gap: 0;
+    }
+
+    /* scattered plushie cards */
+    #homepage { position: relative; display: block; }
+
+    .plushie-card {
+      position: absolute;
+      background: white; border-radius: var(--radius-lg);
+      box-shadow: 0 8px 32px rgba(180,120,160,0.18);
+      padding: 14px; display: flex; align-items: center; justify-content: center;
+      border: 2px solid var(--border);
+    }
+    .plushie-card svg { display: block; }
+
+    /* two flex columns flanking the center */
+    .home-col {
+      position: absolute; top: 0; bottom: 0; width: 26%;
+      display: flex; flex-direction: column;
+      justify-content: space-evenly; align-items: center;
+      padding: 40px 0;
+    }
+    .home-col-left  { left: 0; }
+    .home-col-right { right: 0; }
+
+    /* cards inside columns are flow-positioned, not absolutely placed */
+    .home-col .plushie-card { position: relative; top: auto; left: auto; }
+
+    .pc-bear     { animation: float-a 4.2s ease-in-out infinite; rotate: -6deg; }
+    .pc-penguin  { animation: float-c 4.6s ease-in-out infinite; rotate: -3deg; }
+    .pc-bunny    { animation: float-b 3.9s ease-in-out infinite; rotate:  5deg; }
+    .pc-frog     { animation: float-d 3.7s ease-in-out infinite; rotate:  7deg; }
+    .pc-elephant { animation: float-a 4.4s ease-in-out infinite; rotate: -5deg; }
+    .pc-duck     { animation: float-b 4.1s ease-in-out infinite; rotate:  4deg; }
+    .pc-loaf     { display: none; }
+
+    /* center — branding + buttons */
+    #home-right {
+      position: absolute;
+      top: 50%; left: 50%; transform: translate(-50%, -50%);
+      width: 300px;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center;
+    }
+    #home-logo {
+      font-size: 3.2rem; margin-bottom: 6px;
+      animation: pop-in 0.5s cubic-bezier(.34,1.56,.64,1) both;
+    }
+    #home-title {
+      font-size: 2.1rem; font-weight: 800; color: var(--text);
+      letter-spacing: -0.5px; margin-bottom: 6px; line-height: 1.1;
+      animation: pop-in 0.5s 0.07s cubic-bezier(.34,1.56,.64,1) both;
+    }
+    #home-subtitle {
+      font-size: 0.85rem; font-weight: 600; color: var(--text-lt);
+      margin-bottom: 40px; line-height: 1.5;
+      animation: pop-in 0.5s 0.12s cubic-bezier(.34,1.56,.64,1) both;
+    }
+    #home-buttons {
+      display: flex; flex-direction: column; gap: 14px; width: 100%;
+      animation: pop-in 0.5s 0.18s cubic-bezier(.34,1.56,.64,1) both;
+    }
+    .home-btn {
+      padding: 15px 22px; border: none; border-radius: var(--radius-pill);
+      font-family: inherit; font-size: 0.95rem; font-weight: 800; cursor: pointer;
+      display: flex; align-items: center; gap: 12px;
+      transition: transform 0.15s, box-shadow 0.15s;
+      text-align: left; width: 100%;
+    }
+    .home-btn:hover  { transform: scale(1.04); }
+    .home-btn:active { transform: scale(0.97); }
+    .home-btn .btn-icon { font-size: 1.25rem; flex-shrink: 0; }
+    .home-btn-primary {
+      background: linear-gradient(135deg, var(--blush-dk) 0%, var(--lav-dk) 100%);
+      color: white; box-shadow: 0 6px 22px rgba(196,130,200,0.4);
+    }
+    .home-btn-secondary {
+      background: white; color: var(--text);
+      border: 2px solid var(--border);
+      box-shadow: 0 4px 14px rgba(180,120,160,0.10);
+    }
+    .home-btn-secondary:hover { background: var(--lavender); }
+
+    /* ── EDITOR VIEW ── */
+    #editor-view {
+      display: grid;
+      grid-template-columns: 226px 1fr 248px;
+      grid-template-rows: 100vh;
+    }
+
+    /* ── HELP / PATTERNS SCREENS ── */
+    #help-screen, #patterns-screen {
+      flex-direction: column;
+      background: linear-gradient(145deg, #fff0f8 0%, #f0e8ff 55%, #e8f8f4 100%);
+    }
+    .subscreen-header {
+      display: flex; align-items: center; gap: 14px;
+      padding: 22px 28px; border-bottom: 2px solid var(--border);
+      background: linear-gradient(135deg, var(--blush) 0%, var(--lavender) 100%);
+      flex-shrink: 0;
+    }
+    .subscreen-back {
+      padding: 8px 18px; border: 2px solid var(--border); border-radius: var(--radius-pill);
+      background: white; color: var(--text); font-family: inherit;
+      font-size: 0.88rem; font-weight: 800; cursor: pointer;
+      transition: background 0.15s, transform 0.12s;
+    }
+    .subscreen-back:hover { background: var(--lavender); transform: scale(1.04); }
+    .subscreen-title {
+      font-size: 1.15rem; font-weight: 800; color: var(--text);
+    }
+    .subscreen-body {
+      flex: 1; display: flex; align-items: center; justify-content: center;
+      color: var(--text-lt); font-size: 0.95rem; font-weight: 600;
+    }
+    .help-text {
+      max-width: 640px; line-height: 1.9; text-align: center;
+      color: var(--text-mid); font-size: 1.15rem; font-weight: 600;
+      padding: 32px;
+    }
+
+    /* ── SHARED PANEL ── */
+    .panel {
+      background: var(--panel-bg);
+      border-right: 2px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      box-shadow: var(--shadow);
+    }
+    .panel:last-child { border-right: none; border-left: 2px solid var(--border); }
+
+    .panel-header {
+      padding: 20px 18px 14px;
+      font-size: 1.05rem; font-weight: 800; color: var(--text);
+      letter-spacing: 0.2px; border-bottom: 2px solid var(--border);
+      flex-shrink: 0;
+      background: linear-gradient(135deg, var(--blush) 0%, var(--lavender) 100%);
+    }
+
+    /* ── LEFT: PROJECTS ── */
+    #btn-new {
+      margin: 14px 14px 0; padding: 11px 16px;
+      background: linear-gradient(135deg, var(--blush-dk) 0%, var(--lav-dk) 100%);
+      color: white; border: none;
+      border-radius: var(--radius-pill); font-size: 0.92rem; font-weight: 800;
+      cursor: pointer; flex-shrink: 0;
+      box-shadow: 0 4px 16px rgba(196,130,200,0.35);
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    #btn-new:hover {
+      transform: scale(1.05);
+      box-shadow: 0 6px 22px rgba(196,130,200,0.45);
+    }
+    #btn-new:active { transform: scale(0.97); }
+
+    #btn-home {
+      display: none; /* shown only when editor is active */
+      position: fixed; top: 14px; left: calc(226px + 14px); z-index: 9999;
+      background: white; border: 2px solid var(--border); cursor: pointer;
+      font-size: 0.82rem; font-weight: 800; font-family: inherit;
+      padding: 8px 16px; border-radius: var(--radius-pill);
+      color: var(--text); transition: background 0.15s, transform 0.12s, box-shadow 0.15s;
+      box-shadow: 0 3px 14px rgba(180,120,160,0.22);
+    }
+    #btn-home:hover { background: var(--lavender); transform: scale(1.06); box-shadow: 0 5px 18px rgba(180,120,160,0.3); }
+    #btn-home:active { transform: scale(0.96); }
+
+    #project-list {
+      padding: 10px; display: flex; flex-direction: column; gap: 5px; flex: 1;
+    }
+    .project-item {
+      padding: 10px 14px; border-radius: var(--radius-sm); cursor: pointer;
+      font-size: 0.88rem; font-weight: 600; color: var(--text-mid); display: flex;
+      align-items: center; justify-content: space-between;
+      transition: background 0.15s, transform 0.12s; border: 2px solid transparent;
+    }
+    .project-item:hover { background: var(--blush); transform: translateX(2px); }
+    .project-item.active {
+      background: linear-gradient(135deg, var(--blush) 0%, var(--lavender) 100%);
+      border-color: var(--blush-dk); color: var(--text); font-weight: 700;
+    }
+    .project-item .del-btn {
+      background: none; border: none; cursor: pointer;
+      color: var(--text-lt); font-size: 1rem; line-height: 1; padding: 0 2px;
+      opacity: 0; transition: opacity 0.15s;
+    }
+    .project-item:hover .del-btn { opacity: 1; }
+    .project-item .del-btn:hover { color: #e07070; }
+
+    /* ── SELECT MODE ── */
+    #btn-select-mode {
+      margin: 8px 14px 0; padding: 8px 14px; border-radius: var(--radius-pill);
+      font-family: inherit; font-size: 0.78rem; font-weight: 800;
+      border: 2px solid var(--border); background: white; color: var(--text-mid);
+      cursor: pointer; transition: background 0.15s, color 0.15s; flex-shrink: 0;
+    }
+    #btn-select-mode.active { background: var(--lavender); color: var(--text); border-color: var(--lav-dk); }
+    #btn-delete-selected {
+      margin: 0 14px 14px; padding: 11px 16px; border-radius: var(--radius-pill);
+      font-family: inherit; font-size: 0.82rem; font-weight: 800;
+      border: none; background: #f0a0a0; color: #7a1a1a;
+      cursor: pointer; transition: background 0.15s, transform 0.12s;
+      display: none; flex-shrink: 0;
+    }
+    #btn-delete-selected:hover { background: #e07070; color: white; }
+    #btn-delete-selected:active { transform: scale(0.97); }
+    .project-item .select-check {
+      width: 18px; height: 18px; border-radius: 50%;
+      border: 2px solid var(--border); background: white;
+      display: none; flex-shrink: 0; margin-right: 8px;
+      align-items: center; justify-content: center; font-size: 0.7rem;
+      transition: background 0.12s, border-color 0.12s;
+    }
+    body.select-mode .project-item .select-check { display: flex; }
+    body.select-mode .project-item .del-btn { display: none; }
+    body.select-mode .project-item { cursor: default; }
+    body.select-mode .project-item:hover { transform: none; }
+    .project-item.selected .select-check {
+      background: var(--lav-dk); border-color: var(--lav-dk); color: white;
+    }
+    .project-item.selected { background: var(--lavender); border-color: var(--lav-dk); }
+
+    /* ── CENTER: CANVAS ── */
+    #canvas-wrap {
+      position: relative;
+      background: linear-gradient(145deg, #fde8f4 0%, #ede0ff 40%, #d8f5ec 100%);
+    }
+    /* Decorative blobs behind canvas */
+    #canvas-wrap::before,
+    #canvas-wrap::after {
+      content: ''; position: absolute; border-radius: 50%; pointer-events: none;
+      opacity: 0.18;
+    }
+    #canvas-wrap::before {
+      width: 340px; height: 340px;
+      background: radial-gradient(circle, var(--blush-dk), transparent 70%);
+      top: -80px; right: -60px;
+    }
+    #canvas-wrap::after {
+      width: 260px; height: 260px;
+      background: radial-gradient(circle, var(--mint-dk), transparent 70%);
+      bottom: -60px; left: -40px;
+    }
+    #canvas-wrap canvas { display: block; width: 100% !important; height: 100% !important; position: relative; z-index: 1; }
+
+    #hint {
+      position: absolute; bottom: 18px; left: 50%; transform: translateX(-50%);
+      background: rgba(255,255,255,0.82); color: var(--text-lt);
+      font-size: 0.78rem; font-weight: 600; padding: 7px 18px;
+      border-radius: var(--radius-pill);
+      box-shadow: 0 2px 14px rgba(180,120,160,0.14);
+      pointer-events: none; white-space: nowrap; z-index: 2;
+    }
+    #drag-hint {
+      position: absolute; top: 16px; left: 50%; transform: translateX(-50%);
+      background: linear-gradient(135deg, var(--blush-dk), var(--lav-dk));
+      color: white; font-size: 0.8rem; font-weight: 700;
+      padding: 7px 20px; border-radius: var(--radius-pill);
+      box-shadow: 0 4px 18px rgba(196,130,200,0.35);
+      pointer-events: none; white-space: nowrap;
+      opacity: 0; transition: opacity 0.2s; z-index: 2;
+    }
+    #drag-hint.show { opacity: 1; }
+
+    /* ── RIGHT: EDITOR ── */
+    #name-row {
+      padding: 12px 14px; display: flex; gap: 7px;
+      border-bottom: 2px solid var(--border); flex-shrink: 0;
+    }
+    #project-name {
+      flex: 1; padding: 8px 14px;
+      border: 2px solid var(--border);
+      border-radius: var(--radius-pill); font-size: 0.88rem;
+      font-family: 'Baloo 2', sans-serif; font-weight: 600;
+      outline: none; color: var(--text);
+      background: white;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    #project-name:focus {
+      border-color: var(--lav-dk);
+      box-shadow: 0 0 0 3px rgba(192,160,232,0.2);
+    }
+    #btn-name-confirm {
+      padding: 7px 0; border: none; border-radius: var(--radius-pill);
+      background: #6abf6f; color: white;
+      font-size: 1rem; font-weight: 900; cursor: pointer;
+      opacity: 0; pointer-events: none; white-space: nowrap;
+      max-width: 0; overflow: hidden;
+      transition: opacity 0.15s, max-width 0.15s, padding 0.15s;
+      flex-shrink: 0;
+    }
+    #btn-name-confirm.visible {
+      opacity: 1; pointer-events: auto;
+      max-width: 60px; padding: 7px 13px;
+    }
+    #btn-name-confirm:hover { transform: scale(1.08); }
+    #btn-save {
+      padding: 8px 16px;
+      background: linear-gradient(135deg, var(--lav-dk), var(--blush-dk));
+      color: white; border: none; border-radius: var(--radius-pill);
+      font-size: 0.85rem; font-weight: 800; font-family: 'Baloo 2', sans-serif;
+      cursor: pointer; white-space: nowrap;
+      box-shadow: 0 3px 12px rgba(196,130,200,0.3);
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    #btn-save:hover { transform: scale(1.06); box-shadow: 0 5px 18px rgba(196,130,200,0.4); }
+    #btn-save:active { transform: scale(0.97); }
+
+    #btn-undo {
+      padding: 8px 12px; background: white; color: var(--text-mid);
+      border: 2px solid var(--border); border-radius: var(--radius-pill);
+      font-size: 0.9rem; font-weight: 700; cursor: pointer;
+      transition: transform 0.15s, background 0.15s; white-space: nowrap;
+    }
+    #btn-undo:hover:not(:disabled) { background: var(--lavender); transform: scale(1.06); }
+    #btn-undo:disabled { opacity: 0.32; cursor: default; }
+
+    #part-section { padding: 16px 14px; display: flex; flex-direction: column; gap: 0; }
+    #add-part-row { display: flex; gap: 7px; margin-bottom: 10px; }
+    #add-part-row button { flex: 1; }
+
+    #part-controls { display: none; flex-direction: column; gap: 14px; margin-bottom: 14px; }
+
+    #selected-part-name {
+      font-size: 1.05rem; font-weight: 800; color: var(--text);
+      padding-bottom: 12px; border-bottom: 2px solid var(--border);
+    }
+    .ctrl-row { display: flex; flex-direction: column; gap: 7px; }
+    .ctrl-row label {
+      font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.8px;
+      color: var(--text-lt); font-weight: 700;
+    }
+
+    #part-color {
+      width: 100%; height: 44px; border: 2.5px solid var(--border);
+      border-radius: var(--radius-sm); cursor: pointer; padding: 4px; background: white;
+      transition: border-color 0.15s;
+    }
+    #part-color:hover { border-color: var(--lav-dk); }
+
+    #color-palette { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+
+    .pal-swatch {
+      width: 28px; height: 28px; border-radius: 50%;
+      border: 2.5px solid var(--border); cursor: pointer;
+      transition: transform 0.12s, border-color 0.12s, box-shadow 0.12s;
+      flex-shrink: 0;
+    }
+    .pal-swatch:hover { transform: scale(1.22); border-color: var(--lav-dk); }
+    .pal-swatch.active-swatch {
+      border-color: var(--text); box-shadow: 0 0 0 3px rgba(192,160,232,0.35);
+    }
+    #pal-add {
+      width: 28px; height: 28px; border-radius: 50%;
+      border: 2.5px dashed var(--lav-dk); background: none; cursor: pointer;
+      font-size: 1rem; color: var(--lav-dk); display: flex; align-items: center;
+      justify-content: center; line-height: 1; flex-shrink: 0;
+      transition: background 0.12s, transform 0.12s;
+    }
+    #pal-add:hover { background: var(--lavender); transform: scale(1.15); }
+
+    .range-row { display: flex; align-items: center; gap: 10px; }
+    .range-row input[type=range] { flex: 1; accent-color: var(--lav-dk); }
+    .range-val {
+      font-size: 0.82rem; color: var(--lav-dk); font-weight: 800;
+      min-width: 40px; text-align: right;
+    }
+
+    .ctrl-btn {
+      padding: 9px 12px; border-radius: var(--radius-pill); font-size: 0.82rem;
+      cursor: pointer; font-family: 'Baloo 2', sans-serif; font-weight: 700;
+      transition: transform 0.14s, box-shadow 0.14s; text-align: center; border: 2px solid;
+    }
+    .ctrl-btn:hover { transform: scale(1.04); }
+    .ctrl-btn:active { transform: scale(0.97); }
+
+    #btn-deselect {
+      background: var(--peach); border-color: var(--peach-dk); color: #b05050;
+    }
+    #btn-deselect:hover {
+      background: #ffd0c0; box-shadow: 0 3px 12px rgba(220,130,100,0.25);
+    }
+
+    #no-selection {
+      font-size: 0.88rem; color: var(--text-lt); font-style: italic;
+      text-align: center; padding: 18px 10px 10px;
+    }
+
+    /* ── ADD PART SECTION ── */
+    #btn-undo-panel {
+      width: 100%; margin-bottom: 8px;
+      padding: 9px 16px; background: white; color: var(--text-mid);
+      border: 2px solid var(--border); border-radius: var(--radius-pill);
+      font-size: 0.92rem; font-weight: 700; cursor: pointer;
+      transition: transform 0.15s, background 0.15s;
+    }
+    #btn-undo-panel:hover:not(:disabled) { background: var(--lavender); transform: scale(1.04); }
+    #btn-undo-panel:disabled { opacity: 0.32; cursor: default; }
+
+    #whale-options {
+      padding: 8px 14px 4px;
+      border-bottom: 2px solid var(--border);
+      margin-bottom: 4px;
+    }
+
+    #add-part-section {
+      border-top: 2px solid var(--border); padding-top: 14px; margin-top: 6px;
+    }
+    #btn-add-part {
+      padding: 10px 16px; width: 100%;
+      background: linear-gradient(135deg, var(--mint-dk) 0%, var(--lav-dk) 100%);
+      color: white; border: none; border-radius: var(--radius-pill);
+      font-size: 0.88rem; font-weight: 800; font-family: 'Baloo 2', sans-serif;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(142,216,187,0.4);
+      transition: transform 0.14s, box-shadow 0.14s;
+    }
+    #btn-add-part:hover { transform: scale(1.05); box-shadow: 0 6px 20px rgba(142,216,187,0.5); }
+    #btn-add-part:active { transform: scale(0.97); }
+
+    #extra-parts-list { display: flex; flex-direction: column; gap: 5px; margin-top: 10px; }
+
+    .extra-part-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 9px 13px; background: white; border-radius: var(--radius-sm);
+      cursor: pointer; border: 2px solid var(--border);
+      transition: background 0.13s, border-color 0.13s, transform 0.12s;
+      font-size: 0.83rem; font-weight: 600; color: var(--text-mid);
+    }
+    .extra-part-item:hover { background: var(--lavender); border-color: var(--lav-dk); transform: translateX(2px); }
+    .extra-part-item.active {
+      background: linear-gradient(135deg, var(--blush) 0%, var(--lavender) 100%);
+      border-color: var(--lav-dk); color: var(--text); font-weight: 700;
+    }
+    .extra-part-item .ep-name { flex: 1; }
+    .extra-part-item .ep-del {
+      background: none; border: none; cursor: pointer;
+      color: var(--text-lt); font-size: 0.9rem; padding: 0; opacity: 0;
+      transition: opacity 0.15s, color 0.12s; line-height: 1;
+    }
+    .extra-part-item:hover .ep-del { opacity: 1; }
+    .extra-part-item .ep-del:hover { color: #e07070; }
+
+    /* ── MODAL SHARED ── */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(100,60,120,0.22);
+      backdrop-filter: blur(3px);
+      display: none; align-items: center; justify-content: center; z-index: 200;
+    }
+    .modal-overlay.show { display: flex; animation: pop-in 0.18s ease; }
+
+    /* ── CATALOG OVERLAY ── */
+    #catalog-overlay {
+      position: fixed; inset: 0;
+      background: rgba(100,60,120,0.22);
+      backdrop-filter: blur(3px);
+      display: none; align-items: center; justify-content: center; z-index: 200;
+    }
+    #catalog-overlay.show { display: flex; }
+    #catalog-panel {
+      background: var(--panel-bg); border-radius: var(--radius-lg); padding: 26px;
+      width: 380px; max-width: 94vw;
+      box-shadow: var(--shadow-lg);
+      animation: pop-in 0.18s ease;
+      border: 2px solid var(--border);
+    }
+    #catalog-header {
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;
+    }
+    #catalog-header span { font-size: 1.05rem; font-weight: 800; color: var(--text); }
+    #btn-close-catalog {
+      background: var(--blush); border: none; cursor: pointer;
+      font-size: 1rem; color: var(--text-mid); padding: 5px 9px;
+      border-radius: var(--radius-pill);
+      transition: background 0.12s, transform 0.12s; line-height: 1;
+    }
+    #btn-close-catalog:hover { background: var(--blush-dk); color: white; transform: scale(1.1); }
+    #catalog-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .catalog-item {
+      padding: 16px 8px 12px;
+      background: white; border: 2px solid var(--border); border-radius: var(--radius-md);
+      cursor: pointer; text-align: center; font-family: 'Baloo 2', sans-serif;
+      transition: transform 0.13s, box-shadow 0.13s, background 0.13s;
+      box-shadow: 0 2px 10px rgba(180,120,160,0.08);
+    }
+    .catalog-item:hover {
+      background: linear-gradient(135deg, var(--blush) 0%, var(--lavender) 100%);
+      border-color: var(--lav-dk); transform: translateY(-3px) scale(1.03);
+      box-shadow: 0 6px 20px rgba(180,120,160,0.2);
+    }
+    .catalog-item:active { transform: scale(0.97); }
+    .cat-icon { display: flex; align-items: center; justify-content: center; margin-bottom: 6px; height: 48px; }
+    .cat-label { font-size: 0.75rem; color: var(--text-mid); font-weight: 700; }
+
+    /* ── BODY PRESETS MODAL ── */
+    #body-presets-overlay {
+      position: fixed; inset: 0;
+      background: rgba(100,60,120,0.22);
+      backdrop-filter: blur(3px);
+      display: none; align-items: center; justify-content: center; z-index: 200;
+    }
+    #body-presets-overlay.show { display: flex; }
+    #body-presets-panel {
+      background: var(--panel-bg); border-radius: var(--radius-lg); padding: 28px;
+      width: 560px; max-width: 97vw;
+      box-shadow: var(--shadow-lg);
+      animation: pop-in 0.18s ease;
+      border: 2px solid var(--border);
+    }
+    #body-presets-header {
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;
+    }
+    #body-presets-header span { font-size: 1.1rem; font-weight: 800; color: var(--text); }
+    #presets-subheader { font-size: 0.8rem; color: var(--text-lt); margin: -10px 0 16px; font-weight: 600; }
+    #btn-close-presets {
+      background: var(--blush); border: none; cursor: pointer;
+      font-size: 1rem; color: var(--text-mid); padding: 5px 9px;
+      border-radius: var(--radius-pill);
+      transition: background 0.12s, transform 0.12s; line-height: 1;
+    }
+    #btn-close-presets:hover { background: var(--blush-dk); color: white; transform: scale(1.1); }
+    #body-presets-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .preset-item {
+      padding: 12px 6px 14px;
+      background: white; border: 2px solid var(--border); border-radius: var(--radius-md);
+      cursor: pointer; text-align: center; font-family: 'Baloo 2', sans-serif;
+      transition: transform 0.13s, box-shadow 0.13s, background 0.13s;
+      box-shadow: 0 2px 10px rgba(180,120,160,0.08);
+    }
+    .preset-item:hover {
+      background: linear-gradient(135deg, var(--blush) 0%, var(--lavender) 100%);
+      border-color: var(--lav-dk); transform: translateY(-3px) scale(1.03);
+      box-shadow: 0 6px 20px rgba(180,120,160,0.22);
+    }
+    .preset-item:active { transform: scale(0.97); }
+    .preset-item svg { filter: drop-shadow(0 2px 5px rgba(180,100,140,0.15)); }
+    .preset-name { font-size: 0.84rem; font-weight: 800; color: var(--text); margin-bottom: 3px; }
+    .preset-desc { display: none; }
+    #preset-blank-btn { display: none; }
+
+    /* ── CONFIRM DIALOG ── */
+    #confirm-overlay {
+      position: fixed; inset: 0;
+      background: rgba(100,60,120,0.22);
+      backdrop-filter: blur(3px);
+      display: none; align-items: center; justify-content: center; z-index: 300;
+    }
+    #confirm-overlay.show { display: flex; }
+    #confirm-box {
+      background: var(--panel-bg); border-radius: var(--radius-lg); padding: 30px 28px 24px;
+      width: 320px; max-width: 92vw;
+      box-shadow: var(--shadow-lg);
+      animation: pop-in 0.18s ease;
+      border: 2px solid var(--border);
+      text-align: center;
+    }
+    #confirm-box p { font-size: 0.94rem; color: var(--text-mid); margin-bottom: 20px; line-height: 1.6; font-weight: 600; }
+    #confirm-box strong { color: var(--text); }
+    #confirm-actions { display: flex; gap: 10px; justify-content: center; }
+    #confirm-ok {
+      padding: 10px 24px;
+      background: linear-gradient(135deg, #f5a0a0, #e06060);
+      color: white; border: none; border-radius: var(--radius-pill);
+      font-size: 0.88rem; font-weight: 800; cursor: pointer;
+      font-family: 'Baloo 2', sans-serif;
+      box-shadow: 0 4px 14px rgba(220,100,100,0.3);
+      transition: transform 0.14s, box-shadow 0.14s;
+    }
+    #confirm-ok:hover { transform: scale(1.05); box-shadow: 0 6px 20px rgba(220,100,100,0.4); }
+    #confirm-cancel {
+      padding: 10px 24px; background: white; color: var(--text-mid);
+      border: 2px solid var(--border); border-radius: var(--radius-pill);
+      font-size: 0.88rem; font-weight: 700; cursor: pointer;
+      font-family: 'Baloo 2', sans-serif;
+      transition: background 0.14s, transform 0.14s;
+    }
+    #confirm-cancel:hover { background: var(--lavender); transform: scale(1.04); }
+
+    /* ── TOAST ── */
+    #toast {
+      position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
+      background: linear-gradient(135deg, var(--mint-dk), #5ec49a);
+      color: white; padding: 10px 24px; border-radius: var(--radius-pill);
+      font-size: 0.88rem; font-weight: 800; opacity: 0;
+      transition: opacity 0.3s; pointer-events: none; z-index: 999;
+      box-shadow: 0 4px 18px rgba(100,200,160,0.4);
+    }
+    #toast.show { opacity: 1; }
+  </style>
+</head>
+<body>
+
+  <!-- HOMEPAGE -->
+  <div id="homepage" class="screen active">
+
+    <!-- LEFT COLUMN: bear · penguin · bunny -->
+    <div class="home-col home-col-left">
+
+      <!-- Card 1: classic round bear -->
+      <div class="plushie-card pc-bear">
+        <svg width="110" height="130" viewBox="0 0 110 130">
+          <!-- ears -->
+          <circle cx="28" cy="28" r="16" fill="#f4b8d4"/>
+          <circle cx="82" cy="28" r="16" fill="#f4b8d4"/>
+          <circle cx="28" cy="28" r="9"  fill="#edacc4"/>
+          <circle cx="82" cy="28" r="9"  fill="#edacc4"/>
+          <!-- body -->
+          <ellipse cx="55" cy="90" rx="34" ry="36" fill="#f4b8d4"/>
+          <!-- tummy -->
+          <ellipse cx="55" cy="96" rx="20" ry="22" fill="#fdd5e8"/>
+          <!-- head -->
+          <circle cx="55" cy="52" r="30" fill="#f4b8d4"/>
+          <!-- eyes -->
+          <circle cx="44" cy="47" r="5" fill="#5c3d52"/>
+          <circle cx="66" cy="47" r="5" fill="#5c3d52"/>
+          <circle cx="45.5" cy="45.5" r="1.8" fill="white"/>
+          <circle cx="67.5" cy="45.5" r="1.8" fill="white"/>
+          <!-- nose -->
+          <ellipse cx="55" cy="57" rx="6" ry="4" fill="#c47a9a"/>
+          <!-- smile -->
+          <path d="M47,63 Q55,70 63,63" stroke="#c47a9a" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          <!-- arms -->
+          <ellipse cx="19" cy="88" rx="10" ry="16" fill="#f4b8d4" transform="rotate(-20,19,88)"/>
+          <ellipse cx="91" cy="88" rx="10" ry="16" fill="#f4b8d4" transform="rotate(20,91,88)"/>
+          <!-- legs -->
+          <ellipse cx="40" cy="124" rx="12" ry="9" fill="#edacc4"/>
+          <ellipse cx="70" cy="124" rx="12" ry="9" fill="#edacc4"/>
+          <!-- stitch marks -->
+          <line x1="55" y1="108" x2="55" y2="114" stroke="#edacc4" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="50" y1="111" x2="60" y2="111" stroke="#edacc4" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+
+      <!-- Card 2: bunny -->
+      <div class="plushie-card pc-bunny">
+        <svg width="110" height="140" viewBox="0 0 110 140">
+          <!-- long ears -->
+          <ellipse cx="36" cy="22" rx="11" ry="26" fill="#e8d4f8"/>
+          <ellipse cx="74" cy="22" rx="11" ry="26" fill="#e8d4f8"/>
+          <ellipse cx="36" cy="22" rx="6"  ry="20" fill="#f4b8d4"/>
+          <ellipse cx="74" cy="22" rx="6"  ry="20" fill="#f4b8d4"/>
+          <!-- body -->
+          <ellipse cx="55" cy="100" rx="32" ry="34" fill="#e8d4f8"/>
+          <!-- tummy -->
+          <ellipse cx="55" cy="106" rx="18" ry="20" fill="white"/>
+          <!-- head -->
+          <circle cx="55" cy="60" r="28" fill="#e8d4f8"/>
+          <!-- eyes -->
+          <circle cx="44" cy="56" r="5" fill="#8a4a70"/>
+          <circle cx="66" cy="56" r="5" fill="#8a4a70"/>
+          <circle cx="45.5" cy="54.5" r="1.8" fill="white"/>
+          <circle cx="67.5" cy="54.5" r="1.8" fill="white"/>
+          <!-- nose -->
+          <ellipse cx="55" cy="65" rx="5" ry="3.5" fill="#f4a0c0"/>
+          <!-- whisker lines -->
+          <line x1="34" y1="64" x2="48" y2="67" stroke="#c0a0d0" stroke-width="1.2" stroke-linecap="round"/>
+          <line x1="34" y1="68" x2="48" y2="68" stroke="#c0a0d0" stroke-width="1.2" stroke-linecap="round"/>
+          <line x1="62" y1="67" x2="76" y2="64" stroke="#c0a0d0" stroke-width="1.2" stroke-linecap="round"/>
+          <line x1="62" y1="68" x2="76" y2="68" stroke="#c0a0d0" stroke-width="1.2" stroke-linecap="round"/>
+          <!-- arms -->
+          <ellipse cx="21" cy="96" rx="9" ry="14" fill="#e8d4f8" transform="rotate(-15,21,96)"/>
+          <ellipse cx="89" cy="96" rx="9" ry="14" fill="#e8d4f8" transform="rotate(15,89,96)"/>
+          <!-- feet -->
+          <ellipse cx="40" cy="132" rx="14" ry="8" fill="#dfc8f4"/>
+          <ellipse cx="70" cy="132" rx="14" ry="8" fill="#dfc8f4"/>
+        </svg>
+      </div>
+
+      <!-- Card: penguin -->
+      <div class="plushie-card pc-penguin">
+        <svg width="90" height="115" viewBox="0 0 90 115">
+          <!-- body -->
+          <ellipse cx="45" cy="75" rx="30" ry="36" fill="#2a2a3e"/>
+          <!-- white tummy -->
+          <ellipse cx="45" cy="80" rx="18" ry="26" fill="white"/>
+          <!-- head -->
+          <circle cx="45" cy="38" r="24" fill="#2a2a3e"/>
+          <!-- white face patch -->
+          <ellipse cx="45" cy="42" rx="14" ry="16" fill="white"/>
+          <!-- eyes -->
+          <circle cx="39" cy="35" r="4.5" fill="white"/>
+          <circle cx="51" cy="35" r="4.5" fill="white"/>
+          <circle cx="40" cy="36" r="2.5" fill="#1a1a2e"/>
+          <circle cx="52" cy="36" r="2.5" fill="#1a1a2e"/>
+          <circle cx="40.8" cy="35.2" r="1" fill="white"/>
+          <circle cx="52.8" cy="35.2" r="1" fill="white"/>
+          <!-- beak -->
+          <ellipse cx="45" cy="46" rx="5" ry="3.5" fill="#f5a025"/>
+          <!-- wings -->
+          <ellipse cx="13" cy="78" rx="9" ry="20" fill="#2a2a3e" transform="rotate(-10,13,78)"/>
+          <ellipse cx="77" cy="78" rx="9" ry="20" fill="#2a2a3e" transform="rotate(10,77,78)"/>
+          <!-- feet -->
+          <ellipse cx="34" cy="110" rx="12" ry="6" fill="#f5a025" transform="rotate(-10,34,110)"/>
+          <ellipse cx="56" cy="110" rx="12" ry="6" fill="#f5a025" transform="rotate(10,56,110)"/>
+          <!-- scarf -->
+          <rect x="24" y="56" width="42" height="8" rx="4" fill="#e84a6f"/>
+          <rect x="42" y="55" width="10" height="16" rx="3" fill="#e84a6f"/>
+        </svg>
+      </div>
+
+    </div><!-- /home-col-left -->
+
+    <!-- CENTER: branding + nav -->
+    <div id="home-right">
+      <div id="home-logo">🧸</div>
+      <div id="home-title">Plushie Builder</div>
+      <div id="home-subtitle">design your own crochet plushies</div>
+      <div id="home-buttons">
+        <button class="home-btn home-btn-primary" id="btn-go-editor">
+          <span class="btn-icon">✏️</span> Edit Plushies
+        </button>
+        <button class="home-btn home-btn-secondary" id="btn-go-patterns">
+          <span class="btn-icon">🧶</span> Patterns
+        </button>
+        <button class="home-btn home-btn-secondary" id="btn-go-help">
+          <span class="btn-icon">❓</span> Help
+        </button>
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN: frog · elephant · duck -->
+    <div class="home-col home-col-right">
+
+      <!-- Card 3: frog -->
+      <div class="plushie-card pc-frog">
+        <svg width="110" height="120" viewBox="0 0 110 120">
+          <!-- eye bumps on top of head -->
+          <circle cx="33" cy="32" r="14" fill="#a8e6b0"/>
+          <circle cx="77" cy="32" r="14" fill="#a8e6b0"/>
+          <!-- body -->
+          <ellipse cx="55" cy="85" rx="36" ry="32" fill="#a8e6b0"/>
+          <!-- tummy -->
+          <ellipse cx="55" cy="88" rx="22" ry="20" fill="#d4f5d8"/>
+          <!-- head -->
+          <ellipse cx="55" cy="55" rx="32" ry="28" fill="#a8e6b0"/>
+          <!-- eyes (on bumps) -->
+          <circle cx="33" cy="30" r="8" fill="#1a2e1a"/>
+          <circle cx="77" cy="30" r="8" fill="#1a2e1a"/>
+          <circle cx="35" cy="28" r="3" fill="white"/>
+          <circle cx="79" cy="28" r="3" fill="white"/>
+          <!-- nostrils -->
+          <circle cx="50" cy="55" r="2.5" fill="#78c47c"/>
+          <circle cx="60" cy="55" r="2.5" fill="#78c47c"/>
+          <!-- wide smile -->
+          <path d="M36,64 Q55,78 74,64" stroke="#5a9e60" stroke-width="3" fill="none" stroke-linecap="round"/>
+          <!-- arms -->
+          <ellipse cx="17" cy="83" rx="9" ry="14" fill="#a8e6b0" transform="rotate(-25,17,83)"/>
+          <ellipse cx="93" cy="83" rx="9" ry="14" fill="#a8e6b0" transform="rotate(25,93,83)"/>
+          <!-- legs -->
+          <ellipse cx="36" cy="115" rx="13" ry="8" fill="#8ed890"/>
+          <ellipse cx="74" cy="115" rx="13" ry="8" fill="#8ed890"/>
+          <!-- stitch cross -->
+          <line x1="55" y1="95" x2="55" y2="101" stroke="#78c47c" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="50" y1="98" x2="60" y2="98" stroke="#78c47c" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+
+      <!-- Cat loaf hidden (7th card, not in 3+3 layout) -->
+      <div class="plushie-card pc-loaf">
+        <svg width="130" height="100" viewBox="0 0 130 100">
+          <!-- tail -->
+          <path d="M18,42 Q8,30 14,18 Q20,8 28,14" stroke="#f4b8d4" stroke-width="10" fill="none" stroke-linecap="round"/>
+          <!-- body pill -->
+          <ellipse cx="72" cy="58" rx="48" ry="30" fill="#f4b8d4"/>
+          <!-- legs -->
+          <ellipse cx="42" cy="86" rx="9" ry="6" fill="#edacc4"/>
+          <ellipse cx="62" cy="88" rx="9" ry="6" fill="#edacc4"/>
+          <ellipse cx="84" cy="88" rx="9" ry="6" fill="#edacc4"/>
+          <ellipse cx="104" cy="86" rx="9" ry="6" fill="#edacc4"/>
+          <!-- cat ears -->
+          <polygon points="102,18 114,2 120,22" fill="#f4b8d4"/>
+          <polygon points="106,20 114,8 118,24" fill="#edacc4"/>
+          <polygon points="84,14 90,0 98,18" fill="#f4b8d4"/>
+          <polygon points="87,16 91,6 96,20" fill="#edacc4"/>
+          <!-- face on right end -->
+          <circle cx="104" cy="46" r="5" fill="#1a1a2e"/>
+          <circle cx="118" cy="46" r="5" fill="#1a1a2e"/>
+          <circle cx="105.5" cy="44.5" r="1.8" fill="white"/>
+          <circle cx="119.5" cy="44.5" r="1.8" fill="white"/>
+          <!-- cat nose -->
+          <ellipse cx="111" cy="54" rx="4" ry="3" fill="#c47a9a"/>
+          <!-- whiskers -->
+          <line x1="90" y1="52" x2="105" y2="55" stroke="#c0a0c0" stroke-width="1.2" stroke-linecap="round"/>
+          <line x1="90" y1="57" x2="105" y2="57" stroke="#c0a0c0" stroke-width="1.2" stroke-linecap="round"/>
+          <line x1="117" y1="55" x2="128" y2="52" stroke="#c0a0c0" stroke-width="1.2" stroke-linecap="round"/>
+          <line x1="117" y1="57" x2="128" y2="57" stroke="#c0a0c0" stroke-width="1.2" stroke-linecap="round"/>
+        </svg>
+      </div>
+
+      <!-- Card: elephant -->
+      <div class="plushie-card pc-elephant">
+        <svg width="100" height="115" viewBox="0 0 100 115">
+          <!-- ears -->
+          <ellipse cx="18" cy="48" rx="18" ry="22" fill="#c8b4e8"/>
+          <ellipse cx="82" cy="48" rx="18" ry="22" fill="#c8b4e8"/>
+          <ellipse cx="18" cy="48" rx="11" ry="15" fill="#ddd0f4"/>
+          <ellipse cx="82" cy="48" rx="11" ry="15" fill="#ddd0f4"/>
+          <!-- body -->
+          <ellipse cx="50" cy="85" rx="32" ry="28" fill="#c8b4e8"/>
+          <!-- tummy -->
+          <ellipse cx="50" cy="90" rx="18" ry="16" fill="#ddd0f4"/>
+          <!-- head -->
+          <ellipse cx="50" cy="50" rx="26" ry="24" fill="#c8b4e8"/>
+          <!-- trunk -->
+          <path d="M42,68 Q36,82 40,96 Q44,104 50,102" stroke="#c8b4e8" stroke-width="10" fill="none" stroke-linecap="round"/>
+          <path d="M42,68 Q36,82 40,96 Q44,104 50,102" stroke="#ddd0f4" stroke-width="5" fill="none" stroke-linecap="round"/>
+          <!-- eyes -->
+          <circle cx="40" cy="44" r="5" fill="#2a1a3e"/>
+          <circle cx="62" cy="44" r="5" fill="#2a1a3e"/>
+          <circle cx="41.5" cy="42.5" r="1.8" fill="white"/>
+          <circle cx="63.5" cy="42.5" r="1.8" fill="white"/>
+          <!-- legs -->
+          <ellipse cx="30" cy="111" rx="11" ry="7" fill="#b8a0d8"/>
+          <ellipse cx="70" cy="111" rx="11" ry="7" fill="#b8a0d8"/>
+          <!-- tail -->
+          <path d="M80,82 Q90,75 86,68" stroke="#c8b4e8" stroke-width="4" fill="none" stroke-linecap="round"/>
+        </svg>
+      </div>
+
+      <!-- Card: duck -->
+      <div class="plushie-card pc-duck">
+        <svg width="95" height="110" viewBox="0 0 95 110">
+          <!-- wing -->
+          <ellipse cx="72" cy="72" rx="20" ry="14" fill="#e8c830" transform="rotate(20,72,72)"/>
+          <!-- body -->
+          <ellipse cx="48" cy="74" rx="34" ry="28" fill="#f5e040"/>
+          <!-- tail feather -->
+          <ellipse cx="14" cy="68" rx="10" ry="16" fill="#e8c830" transform="rotate(-30,14,68)"/>
+          <!-- head -->
+          <circle cx="62" cy="42" r="22" fill="#f5e040"/>
+          <!-- cheek blush -->
+          <ellipse cx="72" cy="50" rx="7" ry="5" fill="#f5b8c8" opacity="0.6"/>
+          <!-- eye -->
+          <circle cx="68" cy="36" r="5.5" fill="#1a1a2e"/>
+          <circle cx="69.5" cy="34.5" r="2" fill="white"/>
+          <!-- bill -->
+          <ellipse cx="82" cy="46" rx="11" ry="6" fill="#f5a025"/>
+          <line x1="72" y1="46" x2="93" y2="46" stroke="#e08818" stroke-width="1.5"/>
+          <!-- feet -->
+          <ellipse cx="36" cy="101" rx="13" ry="7" fill="#f5a025" transform="rotate(-8,36,101)"/>
+          <ellipse cx="60" cy="103" rx="13" ry="7" fill="#f5a025" transform="rotate(5,60,103)"/>
+        </svg>
+      </div>
+
+    </div><!-- /home-col-right -->
+
+  </div>
+
+  <!-- EDITOR -->
+  <div id="editor-view" class="screen">
+
+  <!-- LEFT: projects -->
+  <div class="panel" id="panel-left">
+    <div class="panel-header">🧸 My Plushies</div>
+    <button id="btn-new">✨ New Plushie</button>
+    <button id="btn-select-mode">Select</button>
+    <div id="project-list"></div>
+    <button id="btn-delete-selected">🗑 Delete Selected</button>
+  </div>
+
+  <!-- CENTER: canvas -->
+  <div id="canvas-wrap">
+    <canvas id="canvas"></canvas>
+    <div id="hint">🖱 Click to select · Drag to move · Scroll to zoom</div>
+    <div id="drag-hint">Moving part — release to place</div>
+  </div>
+
+  <!-- RIGHT: editor -->
+  <div class="panel" id="panel-right">
+    <div class="panel-header">🎨 Edit Plushie</div>
+    <div id="name-row">
+      <input id="project-name" type="text" placeholder="Plushie name…" />
+      <button id="btn-name-confirm" title="Confirm name">✓</button>
+      <button id="btn-undo" disabled title="Undo (Ctrl+Z)">↩</button>
+      <button id="btn-save">Save</button>
+    </div>
+    <div id="whale-options" style="display:none">
+      <div class="ctrl-row">
+        <label>Belly</label>
+        <input type="color" id="belly-color" value="#ddeeff" />
+      </div>
+    </div>
+
+    <div id="part-section">
+
+      <div id="part-controls">
+        <div id="selected-part-name"></div>
+        <div class="ctrl-row">
+          <label>Color</label>
+          <input type="color" id="part-color" />
+          <div id="color-palette"></div>
+        </div>
+        <div class="ctrl-row" id="size-row">
+          <label>Size</label>
+          <div class="range-row">
+            <input type="range" id="part-size" min="0.4" max="2.2" step="0.05" value="1.0" />
+            <span class="range-val" id="size-val">1.0×</span>
+          </div>
+        </div>
+        <div class="ctrl-row" id="rotation-row" style="display:none">
+          <label>Rotate</label>
+          <div class="range-row">
+            <input type="range" id="part-rotation" min="0" max="360" step="1" value="0" />
+            <span class="range-val" id="rotation-val">0°</span>
+          </div>
+        </div>
+        <div class="ctrl-row" id="limb-controls" style="display:none">
+          <label>Length</label>
+          <div class="range-row">
+            <input type="range" id="limb-length" min="0.1" max="3.0" step="0.05" value="1.0" />
+            <span class="range-val" id="limb-length-val">1.0×</span>
+          </div>
+          <label style="margin-top:6px">Width</label>
+          <div class="range-row">
+            <input type="range" id="limb-width" min="0.3" max="3.0" step="0.05" value="1.0" />
+            <span class="range-val" id="limb-width-val">1.0×</span>
+          </div>
+        </div>
+        <button id="btn-deselect"   class="ctrl-btn">Deselect</button>
+      </div>
+
+      <div id="no-selection">Click a part on the plushie to edit it</div>
+
+      <div id="add-part-section">
+        <button id="btn-undo-panel" disabled title="Undo (Ctrl+Z)">↩ Undo</button>
+        <div id="add-part-row">
+          <button id="btn-add-part">＋ Add Part</button>
+        </div>
+        <div id="extra-parts-list"></div>
+      </div>
+    </div>
+  </div>
+
+  </div><!-- /#editor-view -->
+
+  <!-- PATTERNS SCREEN -->
+  <div id="patterns-screen" class="screen">
+    <div class="subscreen-header">
+      <button class="subscreen-back" id="btn-patterns-back">← Back</button>
+      <span class="subscreen-title">🧶 Patterns</span>
+    </div>
+    <div class="subscreen-body">Coming soon…</div>
+  </div>
+
+  <!-- HELP SCREEN -->
+  <div id="help-screen" class="screen">
+    <div class="subscreen-header">
+      <button class="subscreen-back" id="btn-help-back">← Back</button>
+      <span class="subscreen-title">❓ Help</span>
+    </div>
+    <div class="subscreen-body">
+      <p class="help-text">
+        Welcome to the plushie builder app where you can build and receive the pattern for any plushie you want!
+        Click the <strong>Edit Plushies</strong> button on the homepage to start your plushie building journey.
+        Add and delete body parts and change their colors using the panel on the right, and create and delete plushies using the panel on the left.
+        To see the pattern for your plushies, click on the <strong>Patterns</strong> button on the homescreen.
+        Let your creativity flow and your crochet plushie building dreams come true!
+      </p>
+    </div>
+  </div>
+
+  <!-- BODY PRESETS MODAL -->
+  <div id="body-presets-overlay">
+    <div id="body-presets-panel">
+      <div id="body-presets-header">
+        <span id="presets-title">Choose a Body Style</span>
+        <button id="btn-close-presets">✕</button>
+      </div>
+      <p id="presets-subheader"></p>
+      <div id="body-presets-grid">
+        <button id="preset-blank-btn" class="preset-item"></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CATALOG MODAL -->
+  <div id="catalog-overlay">
+    <div id="catalog-panel">
+      <div id="catalog-header">
+        <span>Add Body Part</span>
+        <button id="btn-close-catalog">✕</button>
+      </div>
+      <div id="catalog-grid"></div>
+    </div>
+  </div>
+
+  <div id="confirm-overlay">
+    <div id="confirm-box">
+      <p id="confirm-msg"></p>
+      <div id="confirm-actions">
+        <button id="confirm-ok">Delete</button>
+        <button id="confirm-cancel">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+  <!-- Home button: always in DOM, non-editor screens cover it via z-index -->
+  <button id="btn-home">🏠 Home</button>
+  <!-- Non-module script so goHome is synchronously available on click -->
+  <script>
+    function __goHome() {
+      document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
+      document.getElementById('homepage').classList.add('active');
+      document.getElementById('btn-home').style.display = 'none';
+    }
+    document.getElementById('btn-home').addEventListener('click', __goHome);
+  </script>
+
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+
+    // ═══════════════════════════════════════
+    // PART DEFINITIONS
+    // ═══════════════════════════════════════
+    const PART_DEFS = [
+      { id:'head',     label:'Head',       pos:[0,1.95,0.08],    base:[0.92,0.92,0.88] },
+      { id:'body',     label:'Body',       pos:[0,0,0],           base:[1.1,1.1,1.1] },
+    ];
+    const PART_IDS = PART_DEFS.map(p => p.id);
+
+    // ── CATALOG ──────────────────────────────────────────────────────────────
+    const CATALOG = [
+      { id:'limb',  label:'Limb',  icon:'|  |', base:[0.46,0.66,0.46], shape:'hemi',   color:'#f4b8d4', embed:-0.4 },
+      { id:'ear',   label:'Dome',    icon:'◠',   base:[0.30,0.30,0.30], shape:'hemi',   color:'#f4b8d4', embed:0.38,  spawnDir:[-0.8,2.8,0.2] },
+      { id:'horn',  label:'Horn',    icon:'∧',   base:[0.18,0.55,0.18], shape:'hemi',   color:'#f5f0dc' },
+      { id:'snout', label:'Snout',   icon:'⊙',   base:[0.36,0.24,0.30], shape:'hemi',   color:'#f9d0e0' },
+      { id:'eye',   label:'Eye',     icon:'◉',   base:[0.14,0.14,0.14], shape:'hemi',   color:'#1a1a2e', spawnDir:[0,1.3,1], embed:0, noShadow:true },
+      { id:'mouth', label:'Smile',   icon:'⌣',   base:[0.14,0.14,0.14], shape:'smile',  color:'#1a1a2e', spawnDir:[0,2.0,1] },
+      { id:'beak',  label:'Beak',    icon:'◁',   base:[0.22,0.42,0.22], shape:'hemi',   color:'#f5a025', embed:-0.50, spawnDir:[0,0.2,1] },
+      { id:'nose',    label:'Nose',    icon:'♦',  base:[0.13,0.07,0.10], shape:'hemi',  color:'#1a0800', embed:-0.10, spawnDir:[0,1.5,1] },
+      { id:'muzzle',  label:'Muzzle',  icon:'◡',  base:[0.36,0.21,0.30], shape:'hemi',  color:'#f0ddb0', embed:0.10,  spawnDir:[0,0.8,1] },
+      // catear geo: bw=0.65→full width 1.30, h=1.0, d=0.50 (at unit scale)
+      // base 0.35 → ear is 0.455 wide × 0.35 tall × 0.175 deep (base wider than height ✓)
+      { id:'catear',  label:'Cat Ear', icon:'△',  base:[0.35,0.35,0.35], shape:'hemi',  color:'#f4b8d4', embed:0.12,  spawnDir:[-0.6,3.8,0.4] },
+      { id:'bearear', label:'Bear Ear',icon:'○',  base:[0.35,0.35,0.35], shape:'hemi',  color:'#f4b8d4', embed:0.45,  spawnDir:[-0.6,3.8,0.4] },
+      // cat nose: custom ▽ geometry flat on face; base[1] scales outward protrusion
+      { id:'catnose', label:'Cat Nose',icon:'▽',  base:[0.20,0.20,0.20], shape:'hemi',  color:'#7a2550', embed:-0.04, spawnDir:[0,1.5,1] },
+      // cattail geo: LENGTH=1.0, RADIUS=0.11, gentle S-curve (at unit scale)
+      // base 0.90 → tail 0.90 long × 0.20 diameter; positive embed buries base in body
+      { id:'cattail',     label:'Cat Tail',    icon:'〜', base:[0.90,0.90,0.90], shape:'hemi',  color:'#f4b8d4', embed:0.28,  spawnDir:[0,-0.9,-1.6] },
+      { id:'bobblestitch',label:'Bobble Stitch',icon:'◉',  base:[0.10,0.10,0.10], shape:'hemi',  color:'#f4b8d4', embed:0.10 },
+      { id:'whaletail',   label:'Whale Tail',  icon:'〜', base:[0.55,0.55,0.55], shape:'hemi',  color:'#f4b8d4', embed:0.22, spawnDir:[0,-0.5,-1] },
+    ];
+    const CATALOG_HEMI  = new Set(CATALOG.filter(c => c.shape === 'hemi').map(c => c.id));
+    const CATALOG_SMILE = new Set(CATALOG.filter(c => c.shape === 'smile').map(c => c.id));
+
+    // ═══════════════════════════════════════
+    // PROJECT STORE
+    // ═══════════════════════════════════════
+    const DEFAULT_COLOR = '#f4b8d4';
+
+    function freshParts() {
+      const p = {};
+      PART_IDS.forEach(id => {
+        p[id] = { color:DEFAULT_COLOR, size:1.0, customPos:null, customNormal:null, parentId:null, hidden:false };
+      });
+      return p;
+    }
+
+    function freshExtraParts() {
+      return [
+        { id:uid(), catalogId:'eye',   label:'Eye',       color:'#1a1a2e', size:0.6, rotation:0, customPos:null, customNormal:null, parentId:null, spawnDir:[-0.38,2.2,1]     },
+        { id:uid(), catalogId:'eye',   label:'Eye',       color:'#1a1a2e', size:0.6, rotation:0, customPos:null, customNormal:null, parentId:null, spawnDir:[0.38,2.2,1]      },
+        { id:uid(), catalogId:'mouth', label:'Smile',     color:'#1a1a2e', size:1.0, rotation:0, customPos:null, customNormal:null, parentId:null, spawnDir:[0,2.0,1]         },
+        { id:uid(), catalogId:'limb',  label:'Left Arm',  color:'#f4b8d4', size:1.0, rotation:0, customPos:null, customNormal:null, parentId:null, spawnDir:[-1.32,0.38,0.18], limbLength:1.0, limbWidth:1.0 },
+        { id:uid(), catalogId:'limb',  label:'Right Arm', color:'#f4b8d4', size:1.0, rotation:0, customPos:null, customNormal:null, parentId:null, spawnDir:[1.32,0.38,0.18],  limbLength:1.0, limbWidth:1.0 },
+        { id:uid(), catalogId:'limb',  label:'Left Leg',  color:'#f4b8d4', size:1.0, rotation:0, customPos:null, customNormal:null, parentId:null, spawnDir:[-0.6,-1.62,0.1],  limbLength:1.0, limbWidth:1.0 },
+        { id:uid(), catalogId:'limb',  label:'Right Leg', color:'#f4b8d4', size:1.0, rotation:0, customPos:null, customNormal:null, parentId:null, spawnDir:[0.6,-1.62,0.1],   limbLength:1.0, limbWidth:1.0 },
+      ];
+    }
+
+    function freshBearExtraParts() {
+      const muzzleId = uid();
+      return [
+        { id:uid(),    catalogId:'eye',     label:'Eye',       color:'#1a1a2e', size:0.6, rotation:0, customPos:null, customNormal:null, parentId:null, spawnDir:[-0.38,2.2,1]      },
+        { id:uid(),    catalogId:'eye',     label:'Eye',       color:'#1a1a2e', size:0.6, rotation:0, customPos:null, customNormal:null, parentId:null, spawnDir:[0.38,2.2,1]       },
+        // muzzle replaces the smile; nose is bundled to it
+        { id:muzzleId, catalogId:'muzzle',  label:'Muzzle',    color:'#f0ddb0', size:0.8, rotation:0, customPos:[0,1.72,0.92], customNormal:[0,0,1], parentId:null              },
+        { id:uid(),    catalogId:'nose',    label:'Nose',      color:'#1a0800', size:0.8, rotation:0, customPos:null,          customNormal:null,    parentId:muzzleId, bundled:true },
+        { id:uid(),    catalogId:'limb',    label:'Left Arm',  color:'#f4b8d4', size:1.0, rotation:0, customPos:null, customNormal:null, parentId:null, spawnDir:[-1.32,0.38,0.18], limbLength:1.0, limbWidth:1.0 },
+        { id:uid(),    catalogId:'limb',    label:'Right Arm', color:'#f4b8d4', size:1.0, rotation:0, customPos:null, customNormal:null, parentId:null, spawnDir:[1.32,0.38,0.18],  limbLength:1.0, limbWidth:1.0 },
+        { id:uid(),    catalogId:'limb',    label:'Left Leg',  color:'#f4b8d4', size:1.0, rotation:0, customPos:null, customNormal:null, parentId:null, spawnDir:[-0.6,-1.62,0.1],  limbLength:1.0, limbWidth:1.0 },
+        { id:uid(),    catalogId:'limb',    label:'Right Leg', color:'#f4b8d4', size:1.0, rotation:0, customPos:null, customNormal:null, parentId:null, spawnDir:[0.6,-1.62,0.1],   limbLength:1.0, limbWidth:1.0 },
+        { id:uid(),    catalogId:'bearear', label:'Bear Ear',  color:'#f4b8d4', size:1.0, rotation:0, customPos:null, customNormal:null, parentId:null, spawnDir:[-0.6,3.8,0.4]     },
+        { id:uid(),    catalogId:'bearear', label:'Bear Ear',  color:'#f4b8d4', size:1.0, rotation:0, customPos:null, customNormal:null, parentId:null, spawnDir:[0.6,3.8,0.4]      },
+      ];
+    }
+
+    // Default parts for a cat loaf: 4 legs, face on +X end, tail on -X end
+    function freshLoafExtraParts() {
+      const ep = (catalogId, label, color, size, spawnDir, rotation = 0) => ({
+        id:uid(), catalogId, label, color,
+        size, rotation, customPos:null, customNormal:null, parentId:null, spawnDir,
+        ...(catalogId === 'limb' ? { limbLength: 1.0, limbWidth: 1.0 } : {})
+      });
+      return [
+        // legs on the bottom
+        ep('limb',    'Front Left Leg',  '#f4b8d4', 0.62, [ 1.3, -1.4,  0.7]),
+        ep('limb',    'Front Right Leg', '#f4b8d4', 0.62, [ 1.3, -1.4, -0.7]),
+        ep('limb',    'Back Left Leg',   '#f4b8d4', 0.62, [-1.3, -1.4,  0.7]),
+        ep('limb',    'Back Right Leg',  '#f4b8d4', 0.62, [-1.3, -1.4, -0.7]),
+        // face on +X end
+        ep('eye',     'Eye',     '#1a1a2e', 0.68, [1.25,  0.05,  0.28]),
+        ep('eye',     'Eye',     '#1a1a2e', 0.68, [1.25,  0.05, -0.28]),
+        ep('catnose', 'Cat Nose','#7a2550', 1.00, [1.35, -0.12,  0   ], Math.PI / 2),
+        // ears on top of the face end
+        ep('catear',  'Cat Ear', '#f4b8d4', 1.00, [0.95,  0.90,  0.40], Math.PI / 2),
+        ep('catear',  'Cat Ear', '#f4b8d4', 1.00, [0.95,  0.90, -0.40], Math.PI / 2),
+        // tail on opposite (-X) end, flipped upside down
+        ep('cattail', 'Cat Tail','#f4b8d4', 2.10, [-1.4,  1.00,  0   ], Math.PI),
+      ];
+    }
+
+    function freshWhaleExtraParts() {
+      const ep = (catalogId, label, color, size, spawnDir, extra = {}) => ({
+        id:uid(), catalogId, label, color, size, rotation:0,
+        customPos:null, customNormal:null, parentId:null, spawnDir,
+        ...(catalogId === 'limb' ? { limbLength:0.7, limbWidth:0.85 } : {}),
+        ...extra
+      });
+      // Belly line is at Y ≈ -0.31 on the unit sphere (cos(0.60π)).
+      // Eyes go just above that line on the front face.
+      // Flippers go exactly at that Y on the left and right sides.
+      return [
+        ep('eye',  'Left Eye',      '#1a1a2e', 0.80, [-0.60, -0.22, 1.0]),
+        ep('eye',  'Right Eye',     '#1a1a2e', 0.80, [ 0.60, -0.22, 1.0]),
+        ep('limb',      'Left Flipper',  '#f4b8d4', 0.80, [-1.0,  -0.31, 0.0]),
+        ep('limb',      'Right Flipper', '#f4b8d4', 0.80, [ 1.0,  -0.31, 0.0]),
+        ep('whaletail', 'Whale Tail',    '#f4b8d4', 1.00, [ 0.0,  -0.40, -1.0]),
+      ];
+    }
+
+    function loadStore() {
+      try { return JSON.parse(localStorage.getItem('plushie-store') || '[]'); } catch { return []; }
+    }
+    function saveStore() { localStorage.setItem('plushie-store', JSON.stringify(projects)); }
+
+    // ── UNDO ─────────────────────────────────────────────────────────────────
+    const MAX_UNDO = 30;
+    let undoStack = [];
+
+    function pushUndo() {
+      const proj = currentProject();
+      if (!proj) return;
+      undoStack.push(JSON.parse(JSON.stringify({ parts: proj.parts, extraParts: proj.extraParts })));
+      if (undoStack.length > MAX_UNDO) undoStack.shift();
+      updateUndoBtn();
+    }
+
+    function updateUndoBtn() {
+      const disabled = undoStack.length === 0;
+      const btn = document.getElementById('btn-undo');
+      if (btn) btn.disabled = disabled;
+      const btnPanel = document.getElementById('btn-undo-panel');
+      if (btnPanel) btnPanel.disabled = disabled;
+    }
+
+    function undo() {
+      if (!undoStack.length) return;
+      const snapshot = undoStack.pop();
+      const proj = currentProject();
+      if (!proj) return;
+      clearExtraMeshes();
+      proj.parts = snapshot.parts;
+      proj.extraParts = snapshot.extraParts;
+      applyProject(proj);
+      selectPart(null);
+      updateUndoBtn();
+    }
+
+    // ── Color Palette ──
+    const MAX_PALETTE = 24;
+    let colorPalette = (() => {
+      try { return JSON.parse(localStorage.getItem('plushie-palette') || '[]'); } catch { return []; }
+    })();
+    function savePalette() { localStorage.setItem('plushie-palette', JSON.stringify(colorPalette)); }
+    function addToPalette(hex) {
+      hex = hex.toLowerCase();
+      if (colorPalette.includes(hex)) return; // already saved
+      colorPalette.unshift(hex);
+      if (colorPalette.length > MAX_PALETTE) colorPalette.pop();
+      savePalette();
+      renderPalette();
+    }
+
+    function migrateProject(proj) {
+      PART_IDS.forEach(id => {
+        const p = proj.parts[id];
+        if (!p) return;
+        if (p.customPos    === undefined) p.customPos    = null;
+        if (p.customNormal === undefined) p.customNormal = null;
+        if (p.parentId     === undefined) p.parentId     = null;
+        if (p.hidden       === undefined) p.hidden       = false;
+      });
+      if (!proj.extraParts) proj.extraParts = [];
+      // Re-ID any extra parts that have hardcoded IDs shared across projects
+      const sharedIds = new Set(['ep_eye_l','ep_eye_r','ep_mouth','ep_arm_l','ep_arm_r','ep_leg_l','ep_leg_r']);
+      proj.extraParts.forEach(ep => {
+        if (sharedIds.has(ep.id)) ep.id = uid();
+        if (ep.rotation === undefined) ep.rotation = 0;
+      });
+      // Reset cached positions for face parts so they re-snap to the head
+      proj.extraParts.forEach(ep => {
+        if (ep.catalogId === 'eye' || ep.catalogId === 'mouth') { ep.customPos = null; ep.customNormal = null; }
+      });
+      // Migrate old fixed limbs → extra parts (only if no limb extra parts exist yet)
+      const hasLimbEPs = proj.extraParts.some(ep => ep.catalogId === 'limb');
+      if (!hasLimbEPs) {
+        const oldLimbs = [
+          { oldId:'leftArm',  label:'Left Arm',  spawnDir:[-1.32,0.38,0.18] },
+          { oldId:'rightArm', label:'Right Arm', spawnDir:[1.32,0.38,0.18]  },
+          { oldId:'leftLeg',  label:'Left Leg',  spawnDir:[-0.6,-1.62,0.1]  },
+          { oldId:'rightLeg', label:'Right Leg', spawnDir:[0.6,-1.62,0.1]   },
+        ];
+        oldLimbs.forEach(({ oldId, label, spawnDir }) => {
+          const old = proj.parts[oldId];
+          if (!old || old.hidden) return;
+          proj.extraParts.push({
+            id: uid(), catalogId: 'limb', label,
+            color: old.color || '#f4b8d4', size: old.size || 1.0,
+            customPos: null, customNormal: null, parentId: null, spawnDir
+          });
+        });
+      }
+      if (!proj.bodyShape) proj.bodyShape = 'normal';
+      if (proj.bodyShape === 'whale' && !proj.bellyColor) proj.bellyColor = '#ddeeff';
+      return proj;
+    }
+
+    let projects = loadStore().map(migrateProject);
+    if (!projects.length) {
+      projects.push({ id:uid(), name:'My First Plushie', parts:freshParts(), extraParts:freshExtraParts() });
+      saveStore();
+    }
+    let currentId = projects[0].id;
+
+    function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
+    function currentProject() { return projects.find(p => p.id === currentId); }
+
+    // ═══════════════════════════════════════
+    // THREE.JS SETUP
+    // ═══════════════════════════════════════
+    const canvas  = document.getElementById('canvas');
+    const wrap    = document.getElementById('canvas-wrap');
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:true });
+    renderer.setPixelRatio(devicePixelRatio);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+    const scene  = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+    camera.position.set(0, 0.5, 8);
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.08;
+    controls.zoomSpeed     = 3;
+    controls.minDistance   = 3;
+    controls.maxDistance   = 14;
+    controls.target.set(0, 0.3, 0);
+
+    scene.add(new THREE.AmbientLight(0xffeeff, 1.2));
+    const sun = new THREE.DirectionalLight(0xffffff, 2.5);
+    sun.position.set(4, 8, 6); sun.castShadow = true;
+    sun.shadow.mapSize.set(1024, 1024); scene.add(sun);
+    const fill = new THREE.DirectionalLight(0xd8b4fe, 1.0);
+    fill.position.set(-4, 2, -3); scene.add(fill);
+
+    const floor = new THREE.Mesh(
+      new THREE.CircleGeometry(3,64), new THREE.ShadowMaterial({ opacity:0.12 })
+    );
+    floor.rotation.x = -Math.PI/2; floor.position.y = -2.5; floor.receiveShadow = true;
+    scene.add(floor);
+
+    const toonGrad = (() => {
+      const data = new Uint8Array([100,180,255]);
+      const t = new THREE.DataTexture(data, 3, 1, THREE.RedFormat);
+      t.minFilter = t.magFilter = THREE.NearestFilter;
+      t.generateMipmaps = false; t.needsUpdate = true; return t;
+    })();
+
+    // ═══════════════════════════════════════
+    // MESHES
+    // ═══════════════════════════════════════
+    const plushieGroup = new THREE.Group();
+    scene.add(plushieGroup);
+
+    const sphereGeo = new THREE.SphereGeometry(1, 32, 24);
+    const hemiGeo   = new THREE.SphereGeometry(1, 32, 24, 0, Math.PI*2, 0, Math.PI/2);
+
+    // Pig snout nostrils — two small ellipses added as children of snout mesh
+    const _nostrilShape = new THREE.Shape();
+    _nostrilShape.absellipse(0, 0, 0.19, 0.13, 0, Math.PI * 2, false, 0);
+    const _nostrilGeo = new THREE.ShapeGeometry(_nostrilShape, 14);
+    const _nostrilMat = new THREE.MeshBasicMaterial({ color: 0x5a1a14, side: THREE.DoubleSide, depthWrite: false });
+    const _fwdVec     = new THREE.Vector3(0, 0, 1);
+    function addSnoutNostrils(mesh) {
+      [-0.30, 0.30].forEach(xOff => {
+        const n   = new THREE.Mesh(_nostrilGeo, _nostrilMat);
+        const pos = new THREE.Vector3(xOff, 0.88, 0.08).normalize().multiplyScalar(1.018);
+        n.position.copy(pos);
+        n.quaternion.setFromUnitVectors(_fwdVec, pos.clone().normalize());
+        mesh.add(n);
+      });
+    }
+    const limbGeo   = new THREE.SphereGeometry(1, 32, 24, 0, Math.PI*2, 0, 3*Math.PI/4);
+
+    // Limb geometry: capsule (hemisphere cap + cylinder shaft).
+    // ll=1 → no cylinder (sphere-like), ll>1 → cylinder grows, cap stays round.
+    function buildLimbGeo(ll = 1) {
+      const cylLen = Math.max(0, ll - 1.0);
+      return new THREE.CapsuleGeometry(1, cylLen, 8, 24);
+    }
+    const smileGeo  = new THREE.TorusGeometry(1, 0.07, 6, 32, Math.PI);
+    const coneGeo   = new THREE.ConeGeometry(1, 1, 16);
+    // Loaf body: horizontal pill squished from the side (flat in Z, round ends in Y)
+    const loafGeo = (() => {
+      const g = new THREE.CapsuleGeometry(1, 0.6, 12, 32);
+      g.applyMatrix4(new THREE.Matrix4().makeRotationZ(Math.PI / 2));
+      g.computeVertexNormals();
+      return g;
+    })();
+    // Whale tail: two capsule prongs in a V-fork, base at Y=0 (body attachment).
+    // orientLimb aligns +Y to outward normal; prongs tilt ±Z so they spread
+    // left and right in world space when placed on the back of the whale.
+    const whaleTailGeo = (() => {
+      const pLen = 0.72, pR = 0.26, spread = Math.PI / 5.5;
+      function makeProng(angle) {
+        const g = new THREE.CapsuleGeometry(pR, pLen, 6, 16);
+        // Shift so the base of the prong sits at local origin
+        g.translate(0, pLen / 2 + pR, 0);
+        // Tilt left or right around Z
+        g.applyMatrix4(new THREE.Matrix4().makeRotationZ(angle));
+        return g;
+      }
+      const g = mergeGeometries([makeProng(spread), makeProng(-spread)]);
+      g.computeVertexNormals();
+      return g;
+    })();
+    // Whale belly: partial sphere covering the bottom ~38% (polar angle 0.62π → π).
+    // Slightly larger radius (1.002) to sit on top of the body sphere without z-fighting.
+    const whaleBellyGeo = new THREE.SphereGeometry(1.002, 32, 16, 0, Math.PI*2, Math.PI*0.60, Math.PI*0.40);
+    // ── CAT EAR GEOMETRY ────────────────────────────────────────────────────────
+    // Upright triangle in XY, extruded in Z. Base at Y=0, tip at Y=h.
+    // Proportions: base_width (2×bw) > height (h), gently concave front face.
+    const catEarGeo = (() => {
+      const bw = 0.65, h = 1.0, tip = 0.04, d = 0.50, cv = 0.12;
+      const shape = new THREE.Shape();
+      shape.moveTo(-bw, 0);
+      shape.lineTo( bw, 0);
+      shape.quadraticCurveTo( bw * 0.55, h * 0.50,  tip, h);
+      shape.lineTo(-tip, h);
+      shape.quadraticCurveTo(-bw * 0.55, h * 0.50, -bw, 0);
+      const g = new THREE.ExtrudeGeometry(shape, {
+        depth: d, bevelEnabled: true,
+        bevelThickness: 0.04, bevelSize: 0.04, bevelSegments: 3
+      });
+      // Center in Z only — keep base at Y=0 so orientLimb mounts it correctly
+      g.translate(0, 0, -d / 2);
+      // Scoop the front face (z > 0) to create the concave cupped surface
+      const pos = g.attributes.position;
+      for (let i = 0; i < pos.count; i++) {
+        const z = pos.getZ(i);
+        if (z > 0) {
+          const nx = pos.getX(i) / bw;            // ±1 at edges, 0 at centre
+          const ny = Math.min(1, Math.max(0, pos.getY(i) / h)); // 0=base … 1=tip
+          const scoop = cv * (1 - nx * nx) * Math.sin(Math.PI * ny) * (z / (d / 2));
+          pos.setZ(i, z - scoop);
+        }
+      }
+      pos.needsUpdate = true;
+      g.computeVertexNormals();
+      return g;
+    })();
+
+    // ── BEAR EAR GEOMETRY ───────────────────────────────────────────────────────
+    // Round disk: circle of radius r centered at (0, r) so base sits at Y=0.
+    // Extruded in Z then centered, same mounting convention as cat ear.
+    const bearEarGeo = (() => {
+      const r = 0.65, d = 0.42;
+      const shape = new THREE.Shape();
+      shape.absarc(0, r, r, 0, Math.PI * 2, false);
+      const g = new THREE.ExtrudeGeometry(shape, {
+        depth: d, bevelEnabled: true,
+        bevelThickness: 0.04, bevelSize: 0.04, bevelSegments: 4
+      });
+      g.translate(0, 0, -d / 2);
+      g.computeVertexNormals();
+      return g;
+    })();
+
+    // ── CAT NOSE GEOMETRY ────────────────────────────────────────────────────────
+    // Downward-pointing triangle (▽) that lies FLAT on the face surface.
+    // Shape defined in XY (base at top, tip at bottom), extruded in Z.
+    // Then rotated -90° around X → shape moves to XZ plane, extrusion to +Y (outward).
+    // With orientLimb (local +Y = surface normal), the triangle face is visible head-on.
+    const catNoseGeo = (() => {
+      const bw = 0.55, h = 0.60, tip = 0.04, d = 0.22;
+      const shape = new THREE.Shape();
+      shape.moveTo(-bw,  h);  // top-left  (base)
+      shape.lineTo( bw,  h);  // top-right (base)
+      shape.quadraticCurveTo( bw * 0.45, h * 0.42,  tip, 0); // right side
+      shape.lineTo(-tip, 0);                                   // flat tip
+      shape.quadraticCurveTo(-bw * 0.45, h * 0.42, -bw,  h); // left side
+      const g = new THREE.ExtrudeGeometry(shape, {
+        depth: d, bevelEnabled: true,
+        bevelThickness: 0.025, bevelSize: 0.025, bevelSegments: 2
+      });
+      // Rotate: shape from XY to XZ, extrusion from +Z to +Y
+      // makeRotationX(-π/2): (x,y,z) → (x, z, -y)
+      g.applyMatrix4(new THREE.Matrix4().makeRotationX(-Math.PI / 2));
+      // Centre vertically on the face (Z axis) so the triangle is centred at the mount point
+      const pos = g.attributes.position;
+      let minZ = Infinity, maxZ = -Infinity;
+      for (let i = 0; i < pos.count; i++) {
+        minZ = Math.min(minZ, pos.getZ(i));
+        maxZ = Math.max(maxZ, pos.getZ(i));
+      }
+      g.translate(0, 0, -(minZ + maxZ) / 2);
+      pos.needsUpdate = true;
+      g.computeVertexNormals();
+      return g;
+    })();
+
+    // ── CAT TAIL GEOMETRY ────────────────────────────────────────────────────────
+    // Gentle S-curved tube. Base at local origin (Y=0), tip at Y≈LENGTH.
+    // Tapers from full radius at base to TIP_TAPER fraction at tip.
+    const catTailGeo = (() => {
+      const LENGTH = 1.0, RADIUS = 0.11, TAPER = 0.35, CURL = 0.20;
+      const SEG = 30, RAD = 14;
+      const pts = [];
+      for (let i = 0; i <= SEG; i++) {
+        const t = i / SEG;
+        pts.push(new THREE.Vector3(
+          CURL * Math.sin(t * Math.PI * 1.5) * LENGTH, // S-bend in X
+          t * LENGTH,
+          0
+        ));
+      }
+      const curve = new THREE.CatmullRomCurve3(pts);
+      const g = new THREE.TubeGeometry(curve, SEG, RADIUS, RAD, false);
+      // Taper: scale each ring's radial offset from the curve centreline
+      const pos = g.attributes.position;
+      for (let i = 0; i <= SEG; i++) {
+        const sc = 1 - (1 - TAPER) * (i / SEG); // 1 at base → TAPER at tip
+        const c  = curve.getPoint(i / SEG);
+        for (let j = 0; j <= RAD; j++) {
+          const idx = i * (RAD + 1) + j;
+          pos.setXYZ(idx,
+            c.x + (pos.getX(idx) - c.x) * sc,
+            c.y + (pos.getY(idx) - c.y) * sc,
+            c.z + (pos.getZ(idx) - c.z) * sc
+          );
+        }
+      }
+      pos.needsUpdate = true;
+      g.computeVertexNormals();
+      // Store cap info so addPartMesh can close both ends
+      g.userData.baseTangent = curve.getTangent(0).clone();
+      g.userData.baseRadius  = RADIUS;
+      g.userData.tipPos      = curve.getPoint(1).clone();
+      g.userData.tipRadius   = RADIUS * TAPER;
+      return g;
+    })();
+
+    const meshMap      = {}; // partId → Mesh
+    const outlineMeshes = {}; // partId → outline Mesh
+
+    function makeMaterial(color) {
+      return new THREE.MeshToonMaterial({ color:new THREE.Color(color), gradientMap:toonGrad });
+    }
+    const outlineBaseMat = new THREE.MeshBasicMaterial({ color:0xffe033, side:THREE.BackSide });
+
+    function addPartMesh(id, geo, color) {
+      const mesh = new THREE.Mesh(geo, makeMaterial(color));
+      mesh.castShadow = mesh.receiveShadow = true;
+      mesh.userData.partId = id;
+      plushieGroup.add(mesh);
+      meshMap[id] = mesh;
+
+      // Close the open base of hemi/limb parts so the gap isn't visible
+      if (geo === hemiGeo || geo === limbGeo) {
+        const isLimb  = geo === limbGeo;
+        const capMat  = new THREE.MeshToonMaterial({ color: new THREE.Color(color), gradientMap: toonGrad, side: THREE.BackSide });
+        // limbGeo opening is at local y = -0.707 (sin 135°) with radius 0.707; hemiGeo is at y=0 radius 1
+        const capMesh = new THREE.Mesh(new THREE.CircleGeometry(isLimb ? 0.707 : 1, 32), capMat);
+        capMesh.rotation.x = -Math.PI / 2;
+        if (isLimb) capMesh.position.y = -0.707;
+        mesh.add(capMesh);
+        mesh.userData.capMesh = capMesh;
+      }
+
+      // Make the cat tail solid: DoubleSide walls + disc at base + sphere at tip
+      if (geo === catTailGeo) {
+        // Render tube walls from both sides so interior isn't see-through
+        mesh.material.side = THREE.DoubleSide;
+
+        const { baseTangent, baseRadius, tipPos, tipRadius } = geo.userData;
+        const toonMat = () => new THREE.MeshToonMaterial({ color: new THREE.Color(color), gradientMap: toonGrad });
+
+        // Base disc — closes the end that embeds into the body
+        const baseCap = new THREE.Mesh(new THREE.CircleGeometry(baseRadius, 16), toonMat());
+        baseCap.setRotationFromQuaternion(
+          new THREE.Quaternion().setFromUnitVectors(
+            new THREE.Vector3(0, 0, 1), baseTangent.clone().negate()
+          )
+        );
+        mesh.add(baseCap);
+        mesh.userData.capMesh = baseCap;
+
+        // Tip sphere — rounds off the visible tail tip
+        const tipCap = new THREE.Mesh(new THREE.SphereGeometry(tipRadius, 12, 8), toonMat());
+        tipCap.position.copy(tipPos);
+        mesh.add(tipCap);
+        mesh.userData.capMesh2 = tipCap;
+      }
+
+      const o = new THREE.Mesh(geo, outlineBaseMat.clone());
+      o.visible = false; o.renderOrder = -1;
+      plushieGroup.add(o);
+      outlineMeshes[id] = o;
+    }
+
+    PART_DEFS.forEach(def => {
+      addPartMesh(def.id, sphereGeo, DEFAULT_COLOR);
+      meshMap[def.id].scale.set(...def.base);
+    });
+
+    // Whale belly: child of body mesh so it inherits position/scale automatically.
+    const bellyMesh = new THREE.Mesh(whaleBellyGeo, makeMaterial('#ddeeff'));
+    bellyMesh.visible = false;
+    bellyMesh.castShadow = true;
+    bellyMesh.receiveShadow = true;
+    meshMap['body'].add(bellyMesh);
+    meshMap['body'].userData.bellyMesh = bellyMesh;
+
+    // ═══════════════════════════════════════
+    // ORIENTATION HELPERS
+    // ═══════════════════════════════════════
+    const EMBED = 0.45;
+    const _dome = new THREE.Vector3(0,1,0);
+
+    function orientLimb(id, outwardNormal) {
+      meshMap[id].quaternion.setFromUnitVectors(_dome, outwardNormal);
+    }
+
+    // Like orientLimb but locks X to world-horizontal so the part never tilts sideways.
+    const _worldUp  = new THREE.Vector3(0, 1, 0);
+    const _worldFwd = new THREE.Vector3(0, 0, 1);
+    function orientHorizontal(id, outwardNormal) {
+      const n = outwardNormal.clone().normalize();
+      // Right = worldUp × n  (gives a level horizontal axis)
+      let right = new THREE.Vector3().crossVectors(_worldUp, n);
+      if (right.lengthSq() < 0.001) right.crossVectors(_worldFwd, n); // fallback when n≈worldUp
+      right.normalize();
+      const up = new THREE.Vector3().crossVectors(n, right).normalize();
+      // Basis: local X→right, local Y→outward, local Z→up
+      meshMap[id].quaternion.setFromRotationMatrix(
+        new THREE.Matrix4().makeBasis(right, n, up)
+      );
+    }
+
+    // Route to the right orient function for any extra part.
+    // Pass catalogId explicitly during spawn (ep not yet in extraParts).
+    function applyOrientEP(id, normal, catalogId) {
+      const cid = catalogId ?? getEP(id)?.catalogId;
+      const cat = CATALOG.find(c => c.id === cid);
+      if (!cat) return;
+      if (CATALOG_HEMI.has(cid))  { cat.horizontal ? orientHorizontal(id, normal) : orientLimb(id, normal); }
+      else if (CATALOG_SMILE.has(cid)) orientSmile(id, normal);
+      // Apply user rotation as a twist around the outward surface normal
+      const rotation = getEP(id)?.rotation ?? 0;
+      if (rotation) {
+        const twistQ = new THREE.Quaternion().setFromAxisAngle(normal.clone().normalize(), rotation);
+        meshMap[id].quaternion.premultiply(twistQ);
+      }
+    }
+
+    const _zAxis = new THREE.Vector3(0, 0, 1);
+    function orientSmile(id, outwardNormal) {
+      // Rotate torus so its flat face (default +Z) points along outwardNormal,
+      // then spin 180° around that normal so the arc forms a smile (U-shape).
+      const q1 = new THREE.Quaternion().setFromUnitVectors(_zAxis, outwardNormal);
+      const q2 = new THREE.Quaternion().setFromAxisAngle(outwardNormal.clone().normalize(), Math.PI);
+      meshMap[id].quaternion.multiplyQuaternions(q2, q1);
+    }
+
+const _snapRay = new THREE.Raycaster();
+
+    // Snap onto whichever body/head surface we hit from a given direction
+    function snapToSurface(dirVec) {
+      _snapRay.set(dirVec.clone().multiplyScalar(10), dirVec.clone().negate());
+      const bases = PART_DEFS.filter(d => meshMap[d.id]?.visible).map(d => meshMap[d.id]);
+      const hits  = _snapRay.intersectObjects(bases);
+      if (!hits.length) return null;
+      const h = hits[0];
+      return {
+        pos:      h.point.clone(),
+        normal:   h.face.normal.clone().transformDirection(h.object.matrixWorld).normalize(),
+        parentId: h.object.userData.partId
+      };
+    }
+
+    // ═══════════════════════════════════════
+    // APPLY PROJECT
+    // ═══════════════════════════════════════
+    // ── BODY SHAPE HELPERS ──────────────────────────────────────────────────
+    function getBodyScale(proj, s) {
+      const def = PART_DEFS.find(d => d.id === 'body');
+      if (proj.bodyShape === 'loaf')
+        // loafGeo: horizontal pill squished along its length (X), big round face in YZ
+        return [def.base[0]*s*0.86, def.base[1]*s*0.85, def.base[2]*s*0.82];
+      if (proj.bodyShape === 'whale')
+        // Perfectly round ball
+        return [def.base[0]*s, def.base[0]*s, def.base[0]*s];
+      return [def.base[0]*s, def.base[1]*s, def.base[2]*s];
+    }
+    function getHeadPos(proj) {
+      const bs = proj.parts.body?.size || 1;
+      const hs = proj.parts.head?.size || 1;
+      if (proj.bodyShape === 'loaf') {
+        const bodyTop = 1.1 * 0.85 * bs;
+        return [0, bodyTop + 0.85*hs, 0.08];
+      }
+      if (proj.bodyShape === 'whale') {
+        // Head hidden for whale; position inside body so it doesn't poke out
+        return [0, 0, 0];
+      }
+      return [0, 1.1*bs + 0.85*hs, 0.08];
+    }
+
+    function applyProject(proj) {
+      const isWhale = proj.bodyShape === 'whale';
+      PART_DEFS.forEach(def => {
+        const mesh  = meshMap[def.id];
+        const state = proj.parts[def.id];
+        const hideHead = (proj.bodyShape === 'loaf' || isWhale) && def.id === 'head';
+        mesh.visible = !state.hidden && !hideHead;
+        mesh.material.color.set(state.color);
+        const s = state.size || 1;
+        if (def.id === 'body') {
+          const targetGeo = proj.bodyShape === 'loaf' ? loafGeo : sphereGeo;
+          if (mesh.geometry !== targetGeo) {
+            mesh.geometry = targetGeo;
+            if (outlineMeshes['body']) outlineMeshes['body'].geometry = targetGeo;
+          }
+          mesh.scale.set(...getBodyScale(proj, s));
+          // Whale belly patch
+          const bm = mesh.userData.bellyMesh;
+          if (bm) {
+            bm.visible = isWhale;
+            bm.material.color.set(proj.bellyColor ?? '#ddeeff');
+          }
+        } else {
+          mesh.scale.set(def.base[0]*s, def.base[1]*s, def.base[2]*s);
+        }
+        if (def.id === 'head') {
+          mesh.position.set(...getHeadPos(proj));
+        } else {
+          mesh.position.set(...def.pos);
+        }
+        mesh.rotation.set(0,0,0);
+      });
+
+      plushieGroup.updateWorldMatrix(true, true);
+
+      // If loaf/whale body, head must not be selectable
+      if ((proj.bodyShape === 'loaf' || proj.bodyShape === 'whale') && selectedId === 'head') {
+        selectedId = null;
+      }
+
+      // Extra parts (including limbs)
+      if (proj.extraParts) proj.extraParts.forEach(ep => spawnExtraMesh(ep));
+    }
+
+    // ═══════════════════════════════════════
+    // EXTRA PARTS
+    // ═══════════════════════════════════════
+    function isExtraPart(id) {
+      const proj = currentProject();
+      return !!(proj.extraParts && proj.extraParts.some(ep => ep.id === id));
+    }
+    function getEP(id) {
+      const proj = currentProject();
+      return proj.extraParts ? proj.extraParts.find(ep => ep.id === id) : null;
+    }
+
+    function spawnExtraMesh(ep) {
+      const cat  = CATALOG.find(c => c.id === ep.catalogId);
+      if (!cat) return; // catalog item removed, skip
+      const isH  = CATALOG_HEMI.has(ep.catalogId);
+      const isSm = CATALOG_SMILE.has(ep.catalogId);
+      // Limbs use dynamic capsule geometry (length baked in); everything else uses the shared geo.
+      const geo = ep.catalogId === 'limb' ? buildLimbGeo(ep.limbLength ?? 1) : getCatGeo(ep.catalogId);
+      addPartMesh(ep.id, geo, ep.color);
+      const mesh = meshMap[ep.id];
+      if (ep.catalogId === 'snout') addSnoutNostrils(mesh);
+      if (cat.noShadow) mesh.castShadow = false;
+      const s  = ep.size || 1;
+      const lw = ep.catalogId === 'limb' ? (ep.limbWidth ?? 1) : 1;
+      const ll = ep.catalogId === 'limb' ? (ep.limbLength ?? 1) : 1;
+      // ll shaft is baked into geometry; for ll<1 squish Y scale so the limb visibly shortens.
+      const lyMul = ep.catalogId === 'limb' ? Math.min(ll, 1.0) : 1;
+      mesh.scale.set(cat.base[0]*s*lw, cat.base[1]*s*lyMul, cat.base[2]*s*lw);
+
+      function applyOrientation(normal) { applyOrientEP(ep.id, normal, ep.catalogId); }
+
+      // Bundled part with no position yet: derive from parent's dome tip instead of snapping to body
+      if (ep.bundled && ep.parentId && !ep.customPos) {
+        const proj       = currentProject();
+        const parentEP   = (proj.extraParts ?? []).find(e => e.id === ep.parentId);
+        if (parentEP?.customPos && parentEP?.customNormal) {
+          const parentCat  = CATALOG.find(c => c.id === parentEP.catalogId);
+          const mNormal    = new THREE.Vector3(...parentEP.customNormal);
+          const mPos       = new THREE.Vector3(...parentEP.customPos);
+          const domeTip    = mPos.clone().addScaledVector(mNormal, parentCat.base[1] * (parentEP.size ?? 1));
+          const cAvg       = (cat.base[0]+cat.base[1]+cat.base[2])/3 * (ep.size ?? 1);
+          const cOffset    = -cAvg * (cat.embed ?? 0);
+          const nosePos    = domeTip.clone().addScaledVector(mNormal, cOffset);
+          ep.customPos     = [nosePos.x, nosePos.y, nosePos.z];
+          ep.customNormal  = [mNormal.x, mNormal.y, mNormal.z];
+        }
+      }
+
+      if (ep.customPos) {
+        mesh.position.set(...ep.customPos);
+        const n = ep.customNormal
+          ? new THREE.Vector3(...ep.customNormal)
+          : new THREE.Vector3(...ep.customPos).normalize();
+        applyOrientation(n);
+      } else {
+        // Spawn aimed at the part's own override first, then catalog default
+        const spawnDir = (ep.spawnDir || cat.spawnDir)
+          ? new THREE.Vector3(...(ep.spawnDir || cat.spawnDir)).normalize()
+          : new THREE.Vector3(0, 0, 1);
+        const hit = snapToSurface(spawnDir);
+        if (hit) {
+          const avg    = (cat.base[0]+cat.base[1]+cat.base[2])/3 * s;
+          // Use cat.embed directly — ep is not yet in proj.extraParts at spawn time,
+          // so getEmbedFactor(ep.id) would return the wrong default (EMBED=0.45).
+          const embedFactor = cat.embed !== undefined ? cat.embed : EMBED;
+          const offset = isH ? -avg*embedFactor : isSm ? avg*0.07 : avg*0.85;
+          hit.pos.addScaledVector(hit.normal, offset);
+          mesh.position.copy(hit.pos);
+          ep.customPos    = [hit.pos.x, hit.pos.y, hit.pos.z];
+          ep.customNormal = [hit.normal.x, hit.normal.y, hit.normal.z];
+          if (!ep.bundled) ep.parentId = hit.parentId ?? null;
+          applyOrientation(hit.normal);
+        } else {
+          mesh.position.set(0, 0, 1.2);
+          ep.customPos = [0, 0, 1.2];
+        }
+      }
+      // For short limbs (ll<1), LERP the center toward the body surface so the
+      // limb stays visibly attached rather than floating away.
+      if (ep.catalogId === 'limb' && lyMul < 1.0 && ep.customNormal) {
+        const avg = (cat.base[0]+cat.base[1]+cat.base[2])/3 * s;
+        const embedOffset = -avg * (cat.embed ?? EMBED); // positive: how far center is outside body
+        const outward = new THREE.Vector3(...ep.customNormal).normalize();
+        mesh.position.set(...ep.customPos).addScaledVector(outward, -embedOffset*(1-lyMul));
+      }
+    }
+
+    function addExtraPart(catalogId) {
+      const cat = CATALOG.find(c => c.id === catalogId);
+      if (!cat) return;
+      pushUndo();
+      const proj = currentProject();
+      const ep   = {
+        id: 'ep_' + uid(), catalogId,
+        label: cat.label, color: cat.color, size: 1.0, rotation: 0,
+        customPos: null, customNormal: null, parentId: null,
+        ...(catalogId === 'limb' ? { limbLength: 1.0, limbWidth: 1.0 } : {})
+      };
+      plushieGroup.updateWorldMatrix(true, true);
+      spawnExtraMesh(ep);
+      proj.extraParts.push(ep);
+
+      // Bundle: muzzle comes with a nose already sitting on its dome tip
+      if (catalogId === 'muzzle' && ep.customPos && ep.customNormal) {
+        const noseCat      = CATALOG.find(c => c.id === 'nose');
+        const muzzleNormal = new THREE.Vector3(...ep.customNormal);
+        const muzzlePos    = new THREE.Vector3(...ep.customPos);
+        const domeTip      = muzzlePos.clone().addScaledVector(muzzleNormal, cat.base[1] * ep.size);
+        const noseAvg      = (noseCat.base[0] + noseCat.base[1] + noseCat.base[2]) / 3;
+        const noseOffset   = -noseAvg * (noseCat.embed ?? 0);
+        const nosePos      = domeTip.clone().addScaledVector(muzzleNormal, noseOffset);
+        const noseEp = {
+          id: 'ep_' + uid(), catalogId: 'nose',
+          label: 'Nose', color: noseCat.color, size: 1.0, rotation: 0,
+          customPos:    [nosePos.x,      nosePos.y,      nosePos.z],
+          customNormal: [muzzleNormal.x, muzzleNormal.y, muzzleNormal.z],
+          parentId: ep.id, bundled: true
+        };
+        spawnExtraMesh(noseEp);
+        proj.extraParts.push(noseEp);
+      }
+
+      renderExtraList();
+      selectPart(ep.id);
+      closeCatalog();
+    }
+
+    function removeExtraPart(id) {
+      pushUndo();
+      const proj = currentProject();
+      if (!proj.extraParts) return;
+      // Collect this part and all descendants (cascade delete)
+      const toRemove = new Set([id]);
+      let changed = true;
+      while (changed) {
+        changed = false;
+        proj.extraParts.forEach(ep => {
+          if (ep.parentId && toRemove.has(ep.parentId) && !toRemove.has(ep.id)) {
+            toRemove.add(ep.id); changed = true;
+          }
+        });
+      }
+      toRemove.forEach(rid => {
+        [meshMap[rid], outlineMeshes[rid]].forEach(m => { if (m) plushieGroup.remove(m); });
+        delete meshMap[rid]; delete outlineMeshes[rid];
+      });
+      proj.extraParts = proj.extraParts.filter(ep => !toRemove.has(ep.id));
+      if (toRemove.has(selectedId)) selectPart(null);
+      renderExtraList();
+    }
+
+    function clearExtraMeshes() {
+      Object.keys(meshMap).forEach(id => {
+        if (!PART_IDS.includes(id)) {
+          [meshMap[id], outlineMeshes[id]].forEach(m => { if (m) plushieGroup.remove(m); });
+          delete meshMap[id]; delete outlineMeshes[id];
+        }
+      });
+    }
+
+    function renderExtraList() {
+      const list = document.getElementById('extra-parts-list');
+      list.innerHTML = '';
+      const proj = currentProject();
+      if (!proj) return;
+
+      // Fixed parts (Head, Body) — no delete; hide Head entirely for loaf body
+      PART_DEFS.forEach(def => {
+        if (proj.bodyShape === 'loaf' && def.id === 'head') return;
+        const item = document.createElement('div');
+        item.className = 'extra-part-item' + (def.id === selectedId ? ' active' : '');
+        item.innerHTML = `<span class="ep-name">${def.label}</span>`;
+        item.querySelector('.ep-name').addEventListener('click', () => selectPart(def.id));
+        list.appendChild(item);
+      });
+
+      // Extra parts
+      proj.extraParts?.forEach(ep => {
+        const cat  = CATALOG.find(c => c.id === ep.catalogId);
+        const item = document.createElement('div');
+        item.className = 'extra-part-item' + (ep.id === selectedId ? ' active' : '');
+        item.innerHTML = `<span class="ep-name">${ep.label ?? cat?.label}</span><button class="ep-del">✕</button>`;
+        item.querySelector('.ep-name').addEventListener('click', () => selectPart(ep.id));
+        item.querySelector('.ep-del').addEventListener('click', e => { e.stopPropagation(); removeExtraPart(ep.id); });
+        list.appendChild(item);
+      });
+    }
+
+    // ═══════════════════════════════════════
+    // SELECTION & RAYCASTING
+    // ═══════════════════════════════════════
+    let selectedId = null;
+    let hoveredId  = null;
+    const raycaster = new THREE.Raycaster();
+    const mouse     = new THREE.Vector2();
+
+    function allMeshes() {
+      const proj = currentProject();
+      const out  = PART_DEFS
+        .filter(d => !(proj?.bodyShape === 'loaf' && d.id === 'head'))
+        .map(d => meshMap[d.id]).filter(Boolean);
+      if (proj) proj.extraParts?.forEach(ep => { if (meshMap[ep.id]) out.push(meshMap[ep.id]); });
+      return out;
+    }
+
+    function getMouseIntersect(event) {
+      const rect = canvas.getBoundingClientRect();
+      mouse.x =  ((event.clientX - rect.left) / rect.width)  * 2 - 1;
+      mouse.y = -((event.clientY - rect.top)  / rect.height) * 2 + 1;
+      raycaster.setFromCamera(mouse, camera);
+      const hits = raycaster.intersectObjects(allMeshes());
+      return hits.length ? hits[0].object.userData.partId : null;
+    }
+
+    function selectPart(id) {
+      selectedId = id;
+      updateControls();
+      updateEmissive();
+      renderExtraList();
+    }
+
+    function updateEmissive() {
+      if (!currentProject()) return;
+      const allIds = [...PART_DEFS.map(d => d.id)];
+      currentProject().extraParts?.forEach(ep => allIds.push(ep.id));
+      allIds.forEach(id => {
+        const m = meshMap[id], o = outlineMeshes[id];
+        if (!m) return;
+        if (id === selectedId) {
+          m.material.emissive.set(0xffffff);
+          m.material.emissiveIntensity = 0.10;
+          if (o) o.visible = true;
+        } else {
+          m.material.emissive.set(0xffffff);
+          m.material.emissiveIntensity = id === hoveredId ? 0.12 : 0;
+          if (o) o.visible = false;
+        }
+      });
+    }
+
+    // ═══════════════════════════════════════
+    // DRAG-TO-REPOSITION
+    // ═══════════════════════════════════════
+    const fixedPartId = PART_DEFS.reduce((best, d) => {
+      const vol = d.base[0]*d.base[1]*d.base[2];
+      return vol > best.vol ? { id:d.id, vol } : best;
+    }, { id:null, vol:0 }).id;
+
+    const dragRay    = new THREE.Raycaster();
+    const dragHintEl = document.getElementById('drag-hint');
+    const drag = { partId:null, startX:0, startY:0, active:false, pointerId:null };
+
+    function cancelDrag() {
+      if (drag.pointerId !== null) {
+        try { canvas.releasePointerCapture(drag.pointerId); } catch(_) {}
+      }
+      drag.active = false; drag.partId = null; drag.pointerId = null;
+      dragHintEl.classList.remove('show');
+    }
+
+    function isHemiPart(id) {
+      const ep = getEP(id);
+      return ep ? CATALOG_HEMI.has(ep.catalogId) : false;
+    }
+
+    function isSmilePart(id) {
+      const ep = getEP(id);
+      return ep ? CATALOG_SMILE.has(ep.catalogId) : false;
+    }
+
+function getEmbedFactor(id) {
+      const ep = getEP(id);
+      if (!ep) return EMBED;
+      const cat = CATALOG.find(c => c.id === ep.catalogId);
+      return cat?.embed !== undefined ? cat.embed : EMBED;
+    }
+
+    function getCatGeo(catalogId) {
+      if (catalogId === 'limb')    return limbGeo;
+      if (catalogId === 'beak')    return coneGeo;
+      if (catalogId === 'catear')  return catEarGeo;
+      if (catalogId === 'bearear') return bearEarGeo;
+      if (catalogId === 'catnose') return catNoseGeo;
+      if (catalogId === 'cattail')   return catTailGeo;
+      if (catalogId === 'whaletail') return whaleTailGeo;
+      if (CATALOG_HEMI.has(catalogId))  return hemiGeo;
+      if (CATALOG_SMILE.has(catalogId)) return smileGeo;
+      return sphereGeo;
+    }
+
+    function getPartBase(id) {
+      const def = PART_DEFS.find(d => d.id === id);
+      if (def) return def.base;
+      const ep  = getEP(id);
+      return ep ? (CATALOG.find(c => c.id === ep.catalogId)?.base ?? [0.4,0.4,0.4]) : [0.4,0.4,0.4];
+    }
+
+    function getPartSize(id) {
+      if (isExtraPart(id)) return getEP(id)?.size ?? 1;
+      return currentProject()?.parts[id]?.size ?? 1;
+    }
+
+    const _fallbackRay = new THREE.Raycaster();
+    const _plushieCenter = new THREE.Vector3(0, 0.3, 0);
+
+    function getDragPosition(event, partId) {
+      const rect = canvas.getBoundingClientRect();
+      dragRay.setFromCamera(new THREE.Vector2(
+        ((event.clientX - rect.left) / rect.width)  * 2 - 1,
+        -((event.clientY - rect.top) / rect.height) * 2 + 1
+      ), camera);
+
+      // Exclude the dragged part itself AND any parts parented to it (e.g. nose on muzzle)
+      const proj = currentProject();
+      const childrenOfDragged = new Set(
+        (proj?.extraParts ?? []).filter(ep => ep.parentId === partId).map(ep => ep.id)
+      );
+      const targets = allMeshes().filter(m => {
+        const pid = m.userData.partId;
+        return pid !== partId && !childrenOfDragged.has(pid);
+      });
+
+      function hitToResult(h) {
+        const normal = h.face.normal.clone().transformDirection(h.object.matrixWorld).normalize();
+        const base   = getPartBase(partId);
+        const avg    = (base[0]+base[1]+base[2])/3 * getPartSize(partId);
+        const r      = isHemiPart(partId) ? -avg*getEmbedFactor(partId) : isSmilePart(partId) ? avg*0.07 : avg*0.85;
+        return { pos: h.point.clone().addScaledVector(normal, r), normal, parentId: h.object.userData.partId };
+      }
+
+      // Primary: direct raycast against body surface
+      const hits = dragRay.intersectObjects(targets);
+      if (hits.length) return hitToResult(hits[0]);
+
+      // Fallback: cursor is off the body — project onto the plushie's bounding sphere
+      // and cast inward from there so the limb slides smoothly along the border
+      const ro = dragRay.ray.origin;
+      const rd = dragRay.ray.direction;
+      const oc = new THREE.Vector3().subVectors(ro, _plushieCenter);
+      const t  = Math.max(0, -oc.dot(rd));
+      const closestOnRay = new THREE.Vector3().copy(ro).addScaledVector(rd, t);
+      const outDir = new THREE.Vector3().subVectors(closestOnRay, _plushieCenter);
+      if (outDir.lengthSq() < 0.0001) return null;
+      outDir.normalize();
+      _fallbackRay.set(outDir.clone().multiplyScalar(8).add(_plushieCenter), outDir.clone().negate());
+      const fallbackHits = _fallbackRay.intersectObjects(targets);
+      return fallbackHits.length ? hitToResult(fallbackHits[0]) : null;
+    }
+
+    // Recursively move all parts attached to movedId, re-snapping each to the parent surface
+    function moveAttachedParts(movedId, delta) {
+      const proj = currentProject();
+      const childIds = [];
+      PART_DEFS.forEach(def => {
+        if (proj.parts[def.id]?.parentId === movedId) childIds.push(def.id);
+      });
+      proj.extraParts?.forEach(ep => {
+        if (ep.parentId === movedId) childIds.push(ep.id);
+      });
+      if (!childIds.length) return;
+
+      // Parent mesh has already moved; update world matrices so raycasts are accurate
+      plushieGroup.updateWorldMatrix(true, true);
+
+      childIds.forEach(childId => {
+        const m = meshMap[childId];
+        if (!m) return;
+        const state      = isExtraPart(childId) ? getEP(childId) : proj.parts[childId];
+        const parentMesh = meshMap[movedId];
+        const normalArr  = state?.customNormal;
+        let   snapped    = false;
+
+        const parentIsFixed = PART_IDS.includes(movedId);
+
+        // Extra-part parent (e.g. nose on muzzle): keep child at the same distance from the
+        // parent center but along the parent's NEW outward normal so it stays on the dome tip.
+        if (!parentIsFixed) {
+          const parentEP = getEP(movedId);
+          if (parentEP?.customPos && parentEP?.customNormal) {
+            const newParentPos    = new THREE.Vector3(...parentEP.customPos);
+            const newParentNormal = new THREE.Vector3(...parentEP.customNormal);
+            const oldParentPos    = newParentPos.clone().sub(delta);
+            const dist            = m.position.distanceTo(oldParentPos);
+            const newChildPos     = newParentPos.clone().addScaledVector(newParentNormal, dist);
+            m.position.copy(newChildPos);
+            applyOrientEP(childId, newParentNormal);
+            if (state) {
+              state.customPos    = [newChildPos.x, newChildPos.y, newChildPos.z];
+              state.customNormal = [newParentNormal.x, newParentNormal.y, newParentNormal.z];
+            }
+            snapped = true;
+          }
+        }
+
+        if (!snapped && parentIsFixed && parentMesh && normalArr) {
+          const n         = new THREE.Vector3(...normalArr).normalize();
+          const approxPos = m.position.clone().add(delta);
+          // Cast from outside the parent toward its surface along stored normal
+          _snapRay.set(approxPos.clone().addScaledVector(n, 3), n.clone().negate());
+          const hits = _snapRay.intersectObjects([parentMesh]);
+          if (hits.length) {
+            const h    = hits[0];
+            const newN = h.face.normal.clone().transformDirection(h.object.matrixWorld).normalize();
+            const base = getPartBase(childId);
+            const avg  = (base[0]+base[1]+base[2])/3 * getPartSize(childId);
+            const r    = isHemiPart(childId) ? -avg*getEmbedFactor(childId) : isSmilePart(childId) ? avg*0.07 : avg*0.85;
+            const newPos = h.point.clone().addScaledVector(newN, r);
+            m.position.copy(newPos);
+            applyOrientEP(childId, newN);
+            if (state) {
+              state.customPos    = [newPos.x, newPos.y, newPos.z];
+              state.customNormal = [newN.x, newN.y, newN.z];
+            }
+            snapped = true;
+          }
+        }
+        if (!snapped) {
+          m.position.add(delta);
+          if (state) state.customPos = [m.position.x, m.position.y, m.position.z];
+        }
+        moveAttachedParts(childId, delta);
+      });
+    }
+
+    canvas.addEventListener('pointerdown', e => {
+      if (e.button !== 0) return;
+      const id = getMouseIntersect(e);
+      if (!id) return;
+      drag.partId = id; drag.startX = e.clientX;
+      drag.startY = e.clientY; drag.active = false; drag.pointerId = e.pointerId;
+      e.stopPropagation();
+      canvas.setPointerCapture(e.pointerId);
+    }, true);
+
+    window.addEventListener('pointermove', e => {
+      if (drag.pointerId === null || e.pointerId !== drag.pointerId) return;
+      const dx = e.clientX - drag.startX, dy = e.clientY - drag.startY;
+
+      let useStartPos = false;
+      if (!drag.active && drag.partId === selectedId && drag.partId !== fixedPartId && drag.partId !== 'head' && !getEP(drag.partId)?.bundled && Math.hypot(dx,dy) > 5) {
+        pushUndo();
+        drag.active = true;
+        useStartPos = true;
+        dragHintEl.classList.add('show');
+      }
+
+      if (drag.active) {
+        const dragEvent = useStartPos ? { clientX: drag.startX, clientY: drag.startY } : e;
+        const hit = getDragPosition(dragEvent, drag.partId);
+        if (hit) {
+          const prevPos = meshMap[drag.partId].position.clone();
+          if (isExtraPart(drag.partId)) {
+            const ep = getEP(drag.partId);
+            ep.customPos    = [hit.pos.x, hit.pos.y, hit.pos.z];
+            ep.customNormal = [hit.normal.x, hit.normal.y, hit.normal.z];
+            ep.parentId     = hit.parentId ?? null;
+          } else {
+            const state = currentProject().parts[drag.partId];
+            state.customPos    = [hit.pos.x, hit.pos.y, hit.pos.z];
+            state.customNormal = [hit.normal.x, hit.normal.y, hit.normal.z];
+            state.parentId     = hit.parentId ?? null;
+          }
+          meshMap[drag.partId].position.copy(hit.pos);
+          applyOrientEP(drag.partId, hit.normal);
+          const delta = new THREE.Vector3().subVectors(hit.pos, prevPos);
+          if (delta.lengthSq() > 0) moveAttachedParts(drag.partId, delta);
+        }
+      }
+    });
+
+    window.addEventListener('pointerup', e => {
+      if (drag.pointerId === null || e.pointerId !== drag.pointerId) return;
+      const was = drag.active, pid = drag.partId;
+      drag.active = false; drag.partId = null; drag.pointerId = null;
+      dragHintEl.classList.remove('show');
+      if (!was && pid) selectPart(pid);
+    });
+
+    canvas.addEventListener('pointermove', e => {
+      if (drag.pointerId !== null) return;
+      const id = getMouseIntersect(e);
+      if (id !== hoveredId) {
+        hoveredId = id;
+        canvas.style.cursor = id ? (id === selectedId ? 'move' : 'pointer') : 'grab';
+        updateEmissive();
+      }
+    });
+
+    // ═══════════════════════════════════════
+    // RIGHT PANEL
+    // ═══════════════════════════════════════
+    const colorInput    = document.getElementById('part-color');
+    const sizeInput     = document.getElementById('part-size');
+    const sizeVal       = document.getElementById('size-val');
+    const rotationInput = document.getElementById('part-rotation');
+    const rotationVal   = document.getElementById('rotation-val');
+    const rotationRow   = document.getElementById('rotation-row');
+    const partControls  = document.getElementById('part-controls');
+    const noSelection   = document.getElementById('no-selection');
+    const selectedName  = document.getElementById('selected-part-name');
+    function updateControls() {
+      if (!selectedId || !currentProject()) {
+        partControls.style.display = 'none';
+        noSelection.style.display  = 'block';
+        return;
+      }
+      partControls.style.display = 'flex';
+      noSelection.style.display  = 'none';
+
+      const extra = isExtraPart(selectedId);
+
+      const limbControlsEl = document.getElementById('limb-controls');
+      const sizeRow = document.getElementById('size-row');
+      if (extra) {
+        const ep  = getEP(selectedId);
+        const cat = CATALOG.find(c => c.id === ep.catalogId);
+        selectedName.textContent = cat?.label ?? ep.label;
+        colorInput.value = ep.color;
+        sizeInput.value  = ep.size;
+        sizeVal.textContent = ep.size.toFixed(2) + '×';
+        sizeRow.style.display = cat?.noResize ? 'none' : '';
+        const deg = Math.round(((ep.rotation ?? 0) * 180 / Math.PI + 360) % 360);
+        rotationInput.value = deg;
+        rotationVal.textContent = deg + '°';
+        rotationRow.style.display = '';
+        if (ep.catalogId === 'limb') {
+          limbControlsEl.style.display = '';
+          const ll = ep.limbLength ?? 1, lw = ep.limbWidth ?? 1;
+          document.getElementById('limb-length').value = ll;
+          document.getElementById('limb-length-val').textContent = ll.toFixed(2) + '×';
+          document.getElementById('limb-width').value = lw;
+          document.getElementById('limb-width-val').textContent = lw.toFixed(2) + '×';
+        } else {
+          limbControlsEl.style.display = 'none';
+        }
+      } else {
+        const def   = PART_DEFS.find(d => d.id === selectedId);
+        const state = currentProject().parts[selectedId];
+        selectedName.textContent = def.label;
+        colorInput.value = state.color;
+        sizeInput.value  = state.size || 1;
+        sizeVal.textContent = (state.size || 1).toFixed(2) + '×';
+        sizeRow.style.display = '';
+        rotationRow.style.display = 'none';
+        limbControlsEl.style.display = 'none';
+      }
+      renderPalette();
+    }
+
+    const paletteEl = document.getElementById('color-palette');
+
+    function applyColor(hex) {
+      if (!selectedId) return;
+      pushUndo();
+      colorInput.value = hex;
+      if (isExtraPart(selectedId)) {
+        getEP(selectedId).color = hex;
+      } else {
+        currentProject().parts[selectedId].color = hex;
+      }
+      meshMap[selectedId].material.color.set(hex);
+      const cap = meshMap[selectedId]?.userData.capMesh;
+      if (cap) cap.material.color.set(hex);
+      const cap2 = meshMap[selectedId]?.userData.capMesh2;
+      if (cap2) cap2.material.color.set(hex);
+      renderPalette(); // refresh active swatch highlight
+    }
+
+    function renderPalette() {
+      paletteEl.innerHTML = '';
+      const currentColor = colorInput.value.toLowerCase();
+      colorPalette.forEach(hex => {
+        const sw = document.createElement('button');
+        sw.className = 'pal-swatch' + (hex === currentColor ? ' active-swatch' : '');
+        sw.title = hex;
+        sw.style.background = hex;
+        sw.addEventListener('click', () => applyColor(hex));
+        paletteEl.appendChild(sw);
+      });
+      // "+" button to save current color
+      const addBtn = document.createElement('button');
+      addBtn.id = 'pal-add';
+      addBtn.title = 'Save current color to palette';
+      addBtn.textContent = '+';
+      addBtn.addEventListener('click', () => addToPalette(colorInput.value));
+      paletteEl.appendChild(addBtn);
+    }
+
+    colorInput.addEventListener('pointerdown', () => { if (selectedId) pushUndo(); });
+    // Note: applyColor (swatch clicks) also calls pushUndo() directly.
+
+    colorInput.addEventListener('input', () => {
+      if (!selectedId) return;
+      if (isExtraPart(selectedId)) {
+        getEP(selectedId).color = colorInput.value;
+      } else {
+        currentProject().parts[selectedId].color = colorInput.value;
+      }
+      meshMap[selectedId].material.color.set(colorInput.value);
+      const cap = meshMap[selectedId]?.userData.capMesh;
+      if (cap) cap.material.color.set(colorInput.value);
+      const cap2 = meshMap[selectedId]?.userData.capMesh2;
+      if (cap2) cap2.material.color.set(colorInput.value);
+      renderPalette(); // update active swatch highlight live
+    });
+
+    colorInput.addEventListener('change', () => {
+      // Auto-save to palette when user finishes picking (mouseup/close)
+      if (selectedId) addToPalette(colorInput.value);
+    });
+
+    sizeInput.addEventListener('pointerdown', () => { if (selectedId) pushUndo(); });
+
+    sizeInput.addEventListener('input', () => {
+      if (!selectedId) return;
+      const s = parseFloat(sizeInput.value);
+      sizeVal.textContent = s.toFixed(2) + '×';
+      const base = getPartBase(selectedId);
+      const ep_  = isExtraPart(selectedId) ? getEP(selectedId) : null;
+      const lw_  = ep_?.catalogId === 'limb' ? (ep_.limbWidth ?? 1) : 1;
+      // Limb length is baked into capsule geometry; no ll in Y scale.
+      meshMap[selectedId].scale.set(base[0]*s*lw_, base[1]*s, base[2]*s*lw_);
+      if (isExtraPart(selectedId)) {
+        const ep      = getEP(selectedId);
+        const prevSize = ep.size;
+        ep.size = s;
+        // Re-snap surface-mounted parts (hemi/smile) so they stay on the body when resized.
+        // The embed offset scales with size, so shift the mesh along its stored normal by the delta.
+        if (ep.customNormal && (isHemiPart(selectedId) || isSmilePart(selectedId))) {
+          const cat     = CATALOG.find(c => c.id === ep.catalogId);
+          const bx      = cat.base[0], by = cat.base[1], bz = cat.base[2];
+          const prevAvg = (bx + by + bz) / 3 * prevSize;
+          const newAvg  = (bx + by + bz) / 3 * s;
+          const embedFn = isHemiPart(selectedId)
+            ? avg => -avg * getEmbedFactor(selectedId)
+            : avg =>  avg * 0.07;
+          const delta = embedFn(newAvg) - embedFn(prevAvg);
+          const n = new THREE.Vector3(...ep.customNormal);
+          meshMap[selectedId].position.addScaledVector(n, delta);
+          const p = meshMap[selectedId].position;
+          ep.customPos = [p.x, p.y, p.z];
+
+          // Scale + reposition children parented to this part (e.g. nose on muzzle)
+          const proj = currentProject();
+          const mNormal = new THREE.Vector3(...ep.customNormal);
+          const mPos    = new THREE.Vector3(...ep.customPos);
+          const cat2    = CATALOG.find(c => c.id === ep.catalogId);
+          (proj.extraParts ?? [])
+            .filter(child => child.parentId === selectedId)
+            .forEach(child => {
+              const childMesh = meshMap[child.id];
+              if (!childMesh) return;
+              // Scale child proportionally with parent
+              const ratio        = prevSize > 0 ? s / prevSize : 1;
+              const newChildSize = child.size * ratio;
+              child.size = newChildSize;
+              const childCat  = CATALOG.find(c => c.id === child.catalogId);
+              const cb        = childCat?.base ?? [1, 1, 1];
+              childMesh.scale.set(cb[0]*newChildSize, cb[1]*newChildSize, cb[2]*newChildSize);
+              // Reposition child to the dome tip of the parent at its new size
+              const domeTip  = mPos.clone().addScaledVector(mNormal, cat2.base[1] * s);
+              const cAvg     = (cb[0]+cb[1]+cb[2])/3 * newChildSize;
+              const cOffset  = -cAvg * (childCat?.embed ?? 0);
+              const newPos   = domeTip.clone().addScaledVector(mNormal, cOffset);
+              childMesh.position.copy(newPos);
+              child.customPos    = [newPos.x, newPos.y, newPos.z];
+              child.customNormal = [mNormal.x, mNormal.y, mNormal.z];
+            });
+        }
+      } else {
+        const proj = currentProject();
+        proj.parts[selectedId].size = s;
+        plushieGroup.updateWorldMatrix(true, true);
+        if (selectedId === 'body') {
+          meshMap.body.scale.set(...getBodyScale(proj, s));
+          // Re-snap parts sitting on the body (limbs etc.)
+          moveAttachedParts('body', new THREE.Vector3(0, 0, 0));
+          // Head position depends on body size — reposition it, then follow with face parts
+          const prevHeadPos = meshMap.head?.position.clone() ?? new THREE.Vector3();
+          repositionHead(proj);
+          plushieGroup.updateWorldMatrix(true, true);
+          const headDelta = meshMap.head ? new THREE.Vector3().subVectors(meshMap.head.position, prevHeadPos) : new THREE.Vector3();
+          moveAttachedParts('head', headDelta);
+        } else if (selectedId === 'head') {
+          // Head position also shifts with head size — capture delta before/after
+          const prevHeadPos = meshMap.head?.position.clone() ?? new THREE.Vector3();
+          repositionHead(proj);
+          plushieGroup.updateWorldMatrix(true, true);
+          const headDelta = meshMap.head
+            ? new THREE.Vector3().subVectors(meshMap.head.position, prevHeadPos)
+            : new THREE.Vector3();
+          moveAttachedParts('head', headDelta);
+        }
+      }
+    });
+
+    rotationInput.addEventListener('pointerdown', () => { if (selectedId && isExtraPart(selectedId)) pushUndo(); });
+
+    rotationInput.addEventListener('input', () => {
+      if (!selectedId || !isExtraPart(selectedId)) return;
+      const ep = getEP(selectedId);
+      if (!ep) return;
+      const deg = parseFloat(rotationInput.value);
+      rotationVal.textContent = deg + '°';
+      ep.rotation = deg * Math.PI / 180;
+      if (ep.customNormal) {
+        const n = new THREE.Vector3(...ep.customNormal);
+        applyOrientEP(selectedId, n);
+
+        // Rotate children parented to this part (e.g. nose on muzzle)
+        const proj = currentProject();
+        (proj.extraParts ?? [])
+          .filter(child => child.parentId === selectedId)
+          .forEach(child => {
+            child.rotation = ep.rotation;
+            const cn = new THREE.Vector3(...(child.customNormal ?? [n.x, n.y, n.z]));
+            applyOrientEP(child.id, cn);
+          });
+      }
+    });
+
+    document.getElementById('btn-deselect').addEventListener('click', () => selectPart(null));
+
+    const limbLengthInput = document.getElementById('limb-length');
+    const limbLengthVal   = document.getElementById('limb-length-val');
+    const limbWidthInput  = document.getElementById('limb-width');
+    const limbWidthVal    = document.getElementById('limb-width-val');
+
+    limbLengthInput.addEventListener('pointerdown', () => { if (selectedId) pushUndo(); });
+    limbLengthInput.addEventListener('input', () => {
+      if (!selectedId || !isExtraPart(selectedId)) return;
+      const ep = getEP(selectedId);
+      if (!ep || ep.catalogId !== 'limb') return;
+      const ll = parseFloat(limbLengthInput.value);
+      limbLengthVal.textContent = ll.toFixed(2) + '×';
+      ep.limbLength = ll;
+      // Rebuild geometry so the cap stays round — only the cylinder shaft extends.
+      const mesh = meshMap[selectedId];
+      const oldGeo = mesh.geometry;
+      const newGeo = buildLimbGeo(ll);
+      mesh.geometry = newGeo;
+      if (outlineMeshes[selectedId]) outlineMeshes[selectedId].geometry = newGeo;
+      // Remove old cap disc child if present (from legacy sphere-based limb).
+      const cap = mesh.userData.capMesh;
+      if (cap) { mesh.remove(cap); cap.geometry.dispose(); delete mesh.userData.capMesh; }
+      oldGeo.dispose();
+      // Scale: ll shaft is baked into geometry; for ll<1 squish Y so the limb visibly shortens.
+      const base = getPartBase(selectedId);
+      const s = ep.size ?? 1, lw = ep.limbWidth ?? 1;
+      const lyMul = Math.min(ll, 1.0);
+      meshMap[selectedId].scale.set(base[0]*s*lw, base[1]*s*lyMul, base[2]*s*lw);
+      // LERP center toward body surface so the limb stays attached as it shortens.
+      if (ep.customNormal) {
+        const cat = CATALOG.find(c => c.id === ep.catalogId);
+        const avg = (base[0]+base[1]+base[2])/3 * s;
+        const embedOffset = -avg * (cat?.embed ?? EMBED);
+        const outward = new THREE.Vector3(...ep.customNormal).normalize();
+        meshMap[selectedId].position.set(...ep.customPos).addScaledVector(outward, -embedOffset*(1-lyMul));
+      }
+    });
+
+    limbWidthInput.addEventListener('pointerdown', () => { if (selectedId) pushUndo(); });
+    limbWidthInput.addEventListener('input', () => {
+      if (!selectedId || !isExtraPart(selectedId)) return;
+      const ep = getEP(selectedId);
+      if (!ep || ep.catalogId !== 'limb') return;
+      const lw = parseFloat(limbWidthInput.value);
+      limbWidthVal.textContent = lw.toFixed(2) + '×';
+      ep.limbWidth = lw;
+      const base = getPartBase(selectedId);
+      const s = ep.size ?? 1;
+      // ll shaft is baked into geometry; for ll<1 squish Y so the limb visibly shortens.
+      const lyMul = Math.min(ep.limbLength ?? 1, 1.0);
+      meshMap[selectedId].scale.set(base[0]*s*lw, base[1]*s*lyMul, base[2]*s*lw);
+      // LERP center toward body surface so the limb stays attached.
+      if (ep.customNormal) {
+        const cat = CATALOG.find(c => c.id === ep.catalogId);
+        const avg = (base[0]+base[1]+base[2])/3 * s;
+        const embedOffset = -avg * (cat?.embed ?? EMBED);
+        const outward = new THREE.Vector3(...ep.customNormal).normalize();
+        meshMap[selectedId].position.set(...ep.customPos).addScaledVector(outward, -embedOffset*(1-lyMul));
+      }
+    });
+
+    function repositionHead(proj) {
+      if (meshMap.head) meshMap.head.position.set(...getHeadPos(proj));
+    }
+
+    // ── WHALE BELLY COLOR ────────────────────────────────────────────────────
+    function updateWhaleUI() {
+      const proj = currentProject();
+      const isWhale = proj?.bodyShape === 'whale';
+      document.getElementById('whale-options').style.display = isWhale ? '' : 'none';
+      if (isWhale && proj.bellyColor) {
+        document.getElementById('belly-color').value = proj.bellyColor;
+      }
+    }
+
+    document.getElementById('belly-color').addEventListener('input', e => {
+      const proj = currentProject();
+      if (!proj || proj.bodyShape !== 'whale') return;
+      proj.bellyColor = e.target.value;
+      const bm = meshMap['body']?.userData.bellyMesh;
+      if (bm) bm.material.color.set(proj.bellyColor);
+      saveStore();
+    });
+
+    // ═══════════════════════════════════════
+    // BODY PRESETS
+    // ═══════════════════════════════════════
+    const BODY_PRESETS = [
+      { id:'classic', name:'Classic Doll', desc:'Balanced & round',       bodyShape:'normal', parts:{head:1.0, body:1.0} },
+      { id:'bear',    name:'Bear',         desc:'Doll with muzzle & ears', bodyShape:'normal', parts:{head:1.0, body:1.0}, bearExtra:true },
+      { id:'loaf',    name:'Loaf Cat',     desc:'Short thick pill',        bodyShape:'loaf',   parts:{body:1.15}, hideHead:true, loafExtra:true },
+      { id:'whale',   name:'Round Whale',  desc:'Chubby round ball',       bodyShape:'whale',  parts:{body:1.2},  hideHead:true, whaleExtra:true },
+    ];
+
+    function makePresetIcon(preset) {
+      const fill = '#f8c8da', dk = '#edacc4', eye = '#8a4a70';
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.setAttribute('width', '68'); svg.setAttribute('height', '102');
+      svg.style.cssText = 'display:block;margin:0 auto 2px;';
+
+      if (preset.bodyShape === 'loaf') {
+        // Cat loaf: horizontal pill body, cat face on right, tail on left, 4 legs below
+        svg.setAttribute('viewBox', '0 0 110 95');
+        svg.innerHTML = `
+          <!-- pill body -->
+          <rect x="22" y="30" width="64" height="36" fill="${fill}"/>
+          <ellipse cx="22" cy="48" rx="18" ry="18" fill="${fill}"/>
+          <ellipse cx="86" cy="48" rx="18" ry="18" fill="${fill}"/>
+          <!-- body shading -->
+          <rect x="22" y="54" width="64" height="12" fill="${dk}" opacity="0.25"/>
+          <!-- cat ears on right end (top) -->
+          <polygon points="80,28 87,14 94,28" fill="${fill}" stroke="${dk}" stroke-width="1.2"/>
+          <polygon points="94,28 101,14 108,28" fill="${fill}" stroke="${dk}" stroke-width="1.2"/>
+          <!-- face on right end -->
+          <circle cx="81" cy="43" r="2.5" fill="${eye}"/>
+          <circle cx="91" cy="43" r="2.5" fill="${eye}"/>
+          <polygon points="86,50 83,47 89,47" fill="${eye}"/>
+          <!-- 4 little legs -->
+          <rect x="30" y="66" width="9" height="13" rx="4" fill="${dk}"/>
+          <rect x="43" y="66" width="9" height="13" rx="4" fill="${dk}"/>
+          <rect x="60" y="66" width="9" height="13" rx="4" fill="${dk}"/>
+          <rect x="73" y="66" width="9" height="13" rx="4" fill="${dk}"/>
+          <!-- curly tail on left end -->
+          <path d="M22,44 Q4,38 6,28 Q8,18 18,20" stroke="${dk}" stroke-width="4" fill="none" stroke-linecap="round"/>
+        `;
+      } else if (preset.id === 'bear') {
+        // Bear: round head + bear ears + muzzle bump + nose, no smile
+        svg.setAttribute('viewBox', '0 0 80 120');
+        const cx = 40, headR = 18, bodyR = 20;
+        const headCY = 26, bodyCY = 72, legCY = 100;
+        const armLX = 12, armRX = 68, armCY = 68;
+        svg.innerHTML = `
+          <!-- bear ears (round circles on top of head) -->
+          <circle cx="24" cy="13" r="10" fill="${fill}"/>
+          <circle cx="56" cy="13" r="10" fill="${fill}"/>
+          <circle cx="24" cy="13" r="6"  fill="${dk}"/>
+          <circle cx="56" cy="13" r="6"  fill="${dk}"/>
+          <!-- arms -->
+          <ellipse cx="${armLX}" cy="${armCY}" rx="7" ry="13" fill="${dk}" transform="rotate(-14,${armLX},${armCY})"/>
+          <ellipse cx="${armRX}" cy="${armCY}" rx="7" ry="13" fill="${dk}" transform="rotate(14,${armRX},${armCY})"/>
+          <!-- body -->
+          <ellipse cx="${cx}" cy="${bodyCY}" rx="${bodyR}" ry="${bodyR}" fill="${fill}"/>
+          <!-- legs -->
+          <ellipse cx="31" cy="${legCY}" rx="7" ry="9" fill="${dk}"/>
+          <ellipse cx="49" cy="${legCY}" rx="7" ry="9" fill="${dk}"/>
+          <!-- head -->
+          <circle cx="${cx}" cy="${headCY}" r="${headR}" fill="${fill}"/>
+          <!-- eyes -->
+          <circle cx="33" cy="23" r="2.4" fill="${eye}"/>
+          <circle cx="47" cy="23" r="2.4" fill="${eye}"/>
+          <!-- muzzle bump -->
+          <ellipse cx="${cx}" cy="34" rx="9" ry="6" fill="#f0ddb0"/>
+          <!-- nose -->
+          <ellipse cx="${cx}" cy="31" rx="3.5" ry="2.5" fill="#1a0800"/>
+        `;
+      } else if (preset.id === 'whale') {
+        svg.setAttribute('viewBox', '0 0 90 90');
+        const belly = '#ddeeff', wfill = '#b8d8f0', wdk = '#8ab8d8';
+        svg.innerHTML = `
+          <!-- round body -->
+          <circle cx="45" cy="45" r="36" fill="${wfill}"/>
+          <!-- belly patch (bottom third, lighter) -->
+          <ellipse cx="45" cy="68" rx="24" ry="16" fill="${belly}"/>
+          <!-- left flipper -->
+          <ellipse cx="14" cy="50" rx="8" ry="14" fill="${wdk}" transform="rotate(30,14,50)"/>
+          <!-- right flipper -->
+          <ellipse cx="76" cy="50" rx="8" ry="14" fill="${wdk}" transform="rotate(-30,76,50)"/>
+          <!-- tail fin left -->
+          <ellipse cx="32" cy="78" rx="10" ry="5" fill="${wdk}" transform="rotate(-20,32,78)"/>
+          <!-- tail fin right -->
+          <ellipse cx="58" cy="78" rx="10" ry="5" fill="${wdk}" transform="rotate(20,58,78)"/>
+          <!-- eye -->
+          <circle cx="34" cy="38" r="4" fill="#1a1a2e"/>
+          <circle cx="35.5" cy="36.5" r="1.5" fill="white"/>
+          <!-- smile -->
+          <path d="M36,47 Q45,54 54,47" stroke="#1a1a2e" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+          <!-- blowhole dots -->
+          <circle cx="42" cy="20" r="2.5" fill="${wdk}"/>
+          <circle cx="49" cy="19" r="2" fill="${wdk}"/>
+        `;
+      } else {
+        // Upright classic doll view
+        svg.setAttribute('viewBox', '0 0 80 120');
+        const hs = preset.parts.head, bs = preset.parts.body, cx = 40;
+        const headR = Math.max(10, Math.round(18 * hs));
+        const bodyR = Math.max(12, Math.round(20 * bs));
+        const armRx = Math.max(6, Math.round(7 * Math.sqrt(bs)));
+        const armRy = Math.max(10, Math.round(13 * Math.sqrt(bs)));
+        const legRx = Math.max(6, Math.round(7 * Math.sqrt(bs)));
+        const legRy = Math.max(8, Math.round(9 * Math.sqrt(bs)));
+        const topY  = Math.max(4, Math.round((120 - 2*headR - 2 - 2*bodyR - 2*legRy) / 2));
+        const headCY = topY + headR;
+        const bodyCY = headCY + headR + 2 + bodyR;
+        const legCY  = bodyCY + bodyR + legRy;
+        const armCY  = bodyCY - Math.round(bodyR * 0.1);
+        const armLX  = cx - bodyR - armRx + 5;
+        const armRX  = cx + bodyR + armRx - 5;
+        const eyeR   = Math.max(1.8, headR * 0.12);
+        const eyeOff = headR * 0.29;
+        const smR    = headR * 0.26;
+        const smY    = headCY + headR * 0.2;
+        svg.innerHTML = `
+          <ellipse cx="${armLX}" cy="${armCY}" rx="${armRx}" ry="${armRy}" fill="${dk}" transform="rotate(-14,${armLX},${armCY})"/>
+          <ellipse cx="${armRX}"  cy="${armCY}" rx="${armRx}" ry="${armRy}" fill="${dk}" transform="rotate(14,${armRX},${armCY})"/>
+          <ellipse cx="${cx}" cy="${bodyCY}" rx="${bodyR}" ry="${bodyR}" fill="${fill}"/>
+          <ellipse cx="${cx-legRx-2}" cy="${legCY}" rx="${legRx}" ry="${legRy}" fill="${dk}"/>
+          <ellipse cx="${cx+legRx+2}" cy="${legCY}" rx="${legRx}" ry="${legRy}" fill="${dk}"/>
+          <circle  cx="${cx}" cy="${headCY}" r="${headR}" fill="${fill}"/>
+          <circle  cx="${cx-eyeOff}" cy="${headCY-headR*0.05}" r="${eyeR}" fill="${eye}"/>
+          <circle  cx="${cx+eyeOff}" cy="${headCY-headR*0.05}" r="${eyeR}" fill="${eye}"/>
+          <path d="M${cx-smR},${smY} Q${cx},${smY+smR} ${cx+smR},${smY}" stroke="${eye}" stroke-width="2" fill="none" stroke-linecap="round"/>
+        `;
+      }
+      return svg;
+    }
+
+    function applyBodyPreset(proj, preset, isNew = false) {
+      if (preset) {
+        proj.bodyShape = preset.bodyShape ?? 'normal';
+        Object.entries(preset.parts).forEach(([id, s]) => {
+          if (proj.parts[id]) proj.parts[id].size = s;
+        });
+        if (isNew && preset.hideHead && proj.parts.head) proj.parts.head.hidden = true;
+        if (isNew && preset.loafExtra)  proj.extraParts = freshLoafExtraParts();
+        if (isNew && preset.bearExtra)  proj.extraParts = freshBearExtraParts();
+        if (isNew && preset.whaleExtra) { proj.extraParts = freshWhaleExtraParts(); proj.bellyColor = '#ddeeff'; }
+      }
+    }
+
+    function freshBlankParts() {
+      const p = {};
+      PART_IDS.forEach(id => {
+        p[id] = { color:DEFAULT_COLOR, size:1.0, customPos:null, customNormal:null, parentId:null, hidden:false };
+      });
+      return p;
+    }
+
+    const presetsOverlay = document.getElementById('body-presets-overlay');
+    let _presetsMode = 'new'; // 'new' or 'change'
+
+    function openPresets(mode) {
+      _presetsMode = mode;
+      document.getElementById('presets-title').textContent =
+        mode === 'new' ? 'Choose a Body Style' : 'Change Body Style';
+      document.getElementById('presets-subheader').textContent =
+        mode === 'new' ? '' : 'Changing style resets part sizes';
+      document.getElementById('preset-blank-btn').style.display = mode === 'new' ? '' : 'none';
+      presetsOverlay.classList.add('show');
+    }
+    function closePresets() { presetsOverlay.classList.remove('show'); }
+
+    // Build preset buttons
+    const presetsGrid = document.getElementById('body-presets-grid');
+    BODY_PRESETS.forEach(preset => {
+      const btn = document.createElement('button');
+      btn.className = 'preset-item';
+      btn.appendChild(makePresetIcon(preset));
+      const nameEl = document.createElement('div');
+      nameEl.className = 'preset-name';
+      nameEl.textContent = preset.name;
+      const descEl = document.createElement('div');
+      descEl.className = 'preset-desc';
+      descEl.textContent = preset.desc;
+      btn.appendChild(nameEl);
+      btn.appendChild(descEl);
+      btn.addEventListener('click', () => {
+        if (_presetsMode === 'new') {
+          const p = { id:uid(), name: preset.name, parts:freshBlankParts(), extraParts:freshExtraParts() };
+          applyBodyPreset(p, preset, true);
+          projects.unshift(p); saveStore(); switchProject(p.id);
+        } else {
+          const proj = currentProject();
+          if (!proj) return;
+          pushUndo();
+          applyBodyPreset(proj, preset);
+          clearExtraMeshes();
+          applyProject(proj);
+          updateWhaleUI();
+        }
+        closePresets();
+      });
+      presetsGrid.appendChild(btn);
+    });
+
+    // Blank preset button
+    document.getElementById('preset-blank-btn').innerHTML =
+      '<div class="preset-icon" style="height:52px;align-items:center;justify-content:center;font-size:1.6rem">+</div>' +
+      '<div class="preset-name">Blank</div>';
+    document.getElementById('preset-blank-btn').addEventListener('click', () => {
+      const p = { id:uid(), name:'New Plushie', parts:freshBlankParts(), extraParts:freshExtraParts() };
+      projects.unshift(p); saveStore(); switchProject(p.id);
+      closePresets();
+    });
+
+    document.getElementById('btn-close-presets').addEventListener('click', closePresets);
+    presetsOverlay.addEventListener('click', e => { if (e.target === presetsOverlay) closePresets(); });
+
+    // ═══════════════════════════════════════
+    // CATALOG
+    // ═══════════════════════════════════════
+    const catalogOverlay = document.getElementById('catalog-overlay');
+
+    function getCatalogSVG(id) {
+      const p = '#f4b8d4', pdk = '#edacc4', lav = '#c8b0e8';
+      const svgs = {
+        limb: `<svg viewBox="0 0 44 52" width="36" height="44">
+          <rect x="13" y="6" width="18" height="40" rx="9" fill="${p}"/>
+          <rect x="17" y="9" width="7" height="12" rx="3.5" fill="white" opacity="0.35"/>
+        </svg>`,
+        ear: `<svg viewBox="0 0 44 36" width="44" height="36">
+          <path d="M6,32 A18,20 0 0,1 38,32" fill="${p}"/>
+          <ellipse cx="22" cy="32" rx="16" ry="5" fill="${pdk}"/>
+          <path d="M10,32 A14,15 0 0,1 34,32" fill="#fdd5e8"/>
+        </svg>`,
+        horn: `<svg viewBox="0 0 44 48" width="36" height="44">
+          <polygon points="22,4 10,44 34,44" fill="#f5f0dc"/>
+          <polygon points="22,10 15,36 29,36" fill="white" opacity="0.45"/>
+          <ellipse cx="22" cy="44" rx="12" ry="4" fill="#e0d8b0"/>
+        </svg>`,
+        snout: `<svg viewBox="0 0 44 38" width="44" height="38">
+          <ellipse cx="22" cy="22" rx="18" ry="13" fill="#f9d0e0"/>
+          <ellipse cx="15" cy="20" rx="4.5" ry="3.5" fill="#c87890"/>
+          <ellipse cx="29" cy="20" rx="4.5" ry="3.5" fill="#c87890"/>
+          <ellipse cx="15" cy="20" rx="2" ry="1.5" fill="#5c2030" opacity="0.7"/>
+          <ellipse cx="29" cy="20" rx="2" ry="1.5" fill="#5c2030" opacity="0.7"/>
+        </svg>`,
+        eye: `<svg viewBox="0 0 44 44" width="40" height="40">
+          <circle cx="22" cy="22" r="14" fill="#2a1a3e"/>
+          <circle cx="22" cy="22" r="8" fill="#120a1e"/>
+          <circle cx="27" cy="17" r="4" fill="white"/>
+          <circle cx="27" cy="17" r="2" fill="white" opacity="0.5"/>
+        </svg>`,
+        mouth: `<svg viewBox="0 0 44 30" width="44" height="30">
+          <path d="M8,10 Q22,28 36,10" stroke="#2a1a3e" stroke-width="4" fill="none" stroke-linecap="round"/>
+        </svg>`,
+        beak: `<svg viewBox="0 0 44 38" width="44" height="38">
+          <polygon points="8,6 8,32 40,19" fill="#f5a025"/>
+          <polygon points="8,19 40,19 8,32" fill="#e08818" opacity="0.4"/>
+          <line x1="8" y1="19" x2="40" y2="19" stroke="#c87010" stroke-width="1.5"/>
+        </svg>`,
+        nose: `<svg viewBox="0 0 44 36" width="40" height="32">
+          <ellipse cx="22" cy="20" rx="11" ry="8" fill="#1a0800"/>
+          <ellipse cx="26" cy="17" rx="3.5" ry="2.5" fill="white" opacity="0.25"/>
+        </svg>`,
+        muzzle: `<svg viewBox="0 0 44 32" width="44" height="32">
+          <path d="M4,28 Q12,6 22,4 Q32,6 40,28 Z" fill="#f0ddb0"/>
+          <ellipse cx="22" cy="28" rx="18" ry="5" fill="#dcc890"/>
+          <ellipse cx="22" cy="14" rx="10" ry="6" fill="white" opacity="0.25"/>
+        </svg>`,
+        catear: `<svg viewBox="0 0 44 48" width="38" height="44">
+          <polygon points="22,4 4,46 40,46" fill="${p}"/>
+          <polygon points="22,12 10,40 34,40" fill="#fce0ec"/>
+          <ellipse cx="22" cy="46" rx="18" ry="4" fill="${pdk}"/>
+        </svg>`,
+        bearear: `<svg viewBox="0 0 44 44" width="40" height="40">
+          <circle cx="22" cy="22" r="18" fill="${p}"/>
+          <circle cx="22" cy="22" r="11" fill="${pdk}"/>
+          <circle cx="27" cy="17" r="4" fill="white" opacity="0.3"/>
+        </svg>`,
+        catnose: `<svg viewBox="0 0 44 36" width="40" height="32">
+          <path d="M22,32 C16,32 6,16 10,12 C14,8 30,8 34,12 C38,16 28,32 22,32 Z" fill="#7a2550"/>
+          <ellipse cx="22" cy="14" rx="9" ry="4" fill="#9a3570" opacity="0.5"/>
+        </svg>`,
+        cattail: `<svg viewBox="0 0 44 52" width="36" height="48">
+          <path d="M22,48 C8,38 36,28 22,18 C12,10 8,6 12,4" stroke="${p}" stroke-width="7" fill="none" stroke-linecap="round"/>
+          <path d="M22,48 C8,38 36,28 22,18 C12,10 8,6 12,4" stroke="white" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.3"/>
+        </svg>`,
+        bobblestitch: `<svg viewBox="0 0 44 32" width="44" height="32">
+          <path d="M10,26 A14,16 0 0,1 34,26" fill="${p}"/>
+          <ellipse cx="22" cy="26" rx="12" ry="4" fill="${pdk}"/>
+          <path d="M14,26 A10,11 0 0,1 30,26" fill="white" opacity="0.3"/>
+        </svg>`,
+        whaletail: `<svg viewBox="0 0 56 36" width="52" height="32">
+          <!-- left lobe -->
+          <path d="M22,8 C16,6 4,10 3,20 C2,28 12,30 22,22" fill="${p}"/>
+          <path d="M22,8 C16,8 6,12 6,20 C6,26 14,27 22,22" fill="white" opacity="0.25"/>
+          <!-- right lobe -->
+          <path d="M34,8 C40,6 52,10 53,20 C54,28 44,30 34,22" fill="${p}"/>
+          <path d="M34,8 C40,8 50,12 50,20 C50,26 42,27 34,22" fill="white" opacity="0.25"/>
+          <!-- stem connector -->
+          <path d="M22,8 Q28,14 34,8 Q30,20 34,22 Q28,26 22,22 Q26,20 22,8 Z" fill="${pdk}"/>
+        </svg>`,
+      };
+      return svgs[id] ?? `<svg viewBox="0 0 44 44" width="40" height="40"><circle cx="22" cy="22" r="14" fill="${p}"/></svg>`;
+    }
+
+    CATALOG.forEach(cat => {
+      const btn = document.createElement('button');
+      btn.className = 'catalog-item';
+      btn.innerHTML = `<span class="cat-icon">${getCatalogSVG(cat.id)}</span><span class="cat-label">${cat.label}</span>`;
+      btn.addEventListener('click', () => addExtraPart(cat.id));
+      document.getElementById('catalog-grid').appendChild(btn);
+    });
+
+    function openCatalog()  { catalogOverlay.classList.add('show'); }
+    function closeCatalog() { catalogOverlay.classList.remove('show'); }
+
+    document.getElementById('btn-add-part').addEventListener('click', openCatalog);
+    document.getElementById('btn-close-catalog').addEventListener('click', closeCatalog);
+    catalogOverlay.addEventListener('click', e => { if (e.target === catalogOverlay) closeCatalog(); });
+
+    // ═══════════════════════════════════════
+    // PROJECT PANEL
+    // ═══════════════════════════════════════
+    let selectMode = false;
+    const selectedProjectIds = new Set();
+
+    function setSelectMode(on) {
+      selectMode = on;
+      selectedProjectIds.clear();
+      document.body.classList.toggle('select-mode', on);
+      document.getElementById('btn-select-mode').classList.toggle('active', on);
+      document.getElementById('btn-select-mode').textContent = on ? 'Cancel' : 'Select';
+      document.getElementById('btn-delete-selected').style.display = on ? 'block' : 'none';
+      renderProjectList();
+    }
+
+    function renderProjectList() {
+      const list = document.getElementById('project-list');
+      list.innerHTML = '';
+      projects.forEach(p => {
+        const item = document.createElement('div');
+        const isSelected = selectedProjectIds.has(p.id);
+        item.className = 'project-item'
+          + (p.id === currentId && !selectMode ? ' active' : '')
+          + (isSelected ? ' selected' : '');
+        item.innerHTML = `
+          <span class="select-check">${isSelected ? '✓' : ''}</span>
+          <span style="flex:1">${p.name}</span>
+          <button class="del-btn">✕</button>`;
+        if (selectMode) {
+          item.addEventListener('click', () => {
+            if (selectedProjectIds.has(p.id)) selectedProjectIds.delete(p.id);
+            else selectedProjectIds.add(p.id);
+            renderProjectList();
+          });
+        } else {
+          item.querySelector('span[style]').addEventListener('click', () => switchProject(p.id));
+          item.querySelector('.del-btn').addEventListener('click', e => { e.stopPropagation(); deleteProject(p.id); });
+        }
+        list.appendChild(item);
+      });
+    }
+
+    document.getElementById('btn-select-mode').addEventListener('click', () => setSelectMode(!selectMode));
+
+    document.getElementById('btn-delete-selected').addEventListener('click', () => {
+      if (!selectedProjectIds.size) return;
+      const count = selectedProjectIds.size;
+      showConfirm(`Delete <strong>${count} plushie${count > 1 ? 's' : ''}</strong>? This can't be undone.`, () => {
+        const deletingCurrent = selectedProjectIds.has(currentId);
+        projects = projects.filter(p => !selectedProjectIds.has(p.id));
+        saveStore();
+        setSelectMode(false);
+        if (projects.length === 0) {
+          clearCanvas();
+        } else if (deletingCurrent) {
+          switchProject(projects[0].id);
+        } else {
+          renderProjectList();
+        }
+      });
+    });
+
+    function switchProject(id) {
+      cancelDrag();
+      clearExtraMeshes();
+      currentId = id; selectedId = null;
+      undoStack = []; updateUndoBtn();
+      document.getElementById('project-name').value = currentProject().name;
+      document.getElementById('btn-name-confirm').classList.remove('visible');
+      applyProject(currentProject());
+      updateControls(); updateEmissive(); updateWhaleUI();
+      renderProjectList(); renderExtraList();
+    }
+
+    const nameConfirmBtn = document.getElementById('btn-name-confirm');
+    function confirmName() {
+      const proj = currentProject();
+      if (!proj) return;
+      const newName = document.getElementById('project-name').value.trim() || 'Unnamed';
+      proj.name = newName;
+      document.getElementById('project-name').value = newName;
+      saveStore();
+      renderProjectList();
+      nameConfirmBtn.classList.remove('visible');
+    }
+    document.getElementById('project-name').addEventListener('input', () => {
+      const proj = currentProject();
+      if (!proj) return;
+      nameConfirmBtn.classList.toggle('visible',
+        document.getElementById('project-name').value !== proj.name);
+    });
+    document.getElementById('project-name').addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); confirmName(); }
+    });
+    nameConfirmBtn.addEventListener('click', confirmName);
+
+    document.getElementById('btn-undo').addEventListener('click', undo);
+    document.getElementById('btn-undo-panel').addEventListener('click', undo);
+
+    document.addEventListener('keydown', e => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+        e.preventDefault();
+        undo();
+      }
+    });
+
+    document.getElementById('btn-new').addEventListener('click', () => openPresets('new'));
+
+    document.getElementById('btn-save').addEventListener('click', () => {
+      const proj = currentProject();
+      if (!proj) return;
+      proj.name = document.getElementById('project-name').value.trim() || 'Unnamed';
+      saveStore(); renderProjectList(); showToast('Saved!');
+    });
+
+    // ── Confirm dialog ──
+    const confirmOverlay = document.getElementById('confirm-overlay');
+    const confirmMsg     = document.getElementById('confirm-msg');
+    let confirmCallback  = null;
+
+    function showConfirm(message, onOk) {
+      confirmMsg.innerHTML = message;
+      confirmCallback = onOk;
+      confirmOverlay.classList.add('show');
+    }
+    function closeConfirm() { confirmOverlay.classList.remove('show'); confirmCallback = null; }
+
+    document.getElementById('confirm-ok').addEventListener('click', () => {
+      const cb = confirmCallback; closeConfirm(); cb?.();
+    });
+    document.getElementById('confirm-cancel').addEventListener('click', closeConfirm);
+    confirmOverlay.addEventListener('click', e => { if (e.target === confirmOverlay) closeConfirm(); });
+
+    function clearCanvas() {
+      cancelDrag();
+      // Remove all extra part meshes from the scene (can't use clearExtraMeshes — project already deleted)
+      Object.keys(meshMap).forEach(id => {
+        if (!PART_IDS.includes(id)) {
+          [meshMap[id], outlineMeshes[id]].forEach(m => { if (m) plushieGroup.remove(m); });
+          delete meshMap[id]; delete outlineMeshes[id];
+        }
+      });
+      // Hide all fixed part meshes
+      PART_DEFS.forEach(def => {
+        if (meshMap[def.id]) meshMap[def.id].visible = false;
+        if (outlineMeshes[def.id]) outlineMeshes[def.id].visible = false;
+      });
+      selectedId = null;
+      currentId  = null;
+      document.getElementById('project-name').value = '';
+      updateControls(); updateEmissive(); renderProjectList(); renderExtraList();
+    }
+
+    function deleteProject(id) {
+      const proj = projects.find(p => p.id === id);
+      const name = proj?.name || 'this plushie';
+      showConfirm(`Delete <strong>${name}</strong>? This can't be undone.`, () => {
+        projects = projects.filter(p => p.id !== id);
+        saveStore();
+        if (projects.length === 0) {
+          clearCanvas();
+        } else if (currentId === id) {
+          switchProject(projects[0].id);
+        } else {
+          renderProjectList();
+        }
+      });
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg; t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 1800);
+    }
+
+    // ═══════════════════════════════════════
+    // RESIZE + RENDER
+    // ═══════════════════════════════════════
+    function resize() {
+      const w = wrap.clientWidth, h = wrap.clientHeight;
+      renderer.setSize(w, h, false);
+      camera.aspect = w/h;
+      camera.updateProjectionMatrix();
+    }
+    new ResizeObserver(resize).observe(wrap);
+    resize();
+
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
+      if (selectedId && outlineMeshes[selectedId]) {
+        const m = meshMap[selectedId], o = outlineMeshes[selectedId];
+        if (m && o && o.visible) {
+          // Scale about the geometry's bounding sphere center, not local origin.
+          // For sphere-centered geo the correction is ~0; for offset geo (e.g. tail)
+          // this keeps the outline centered on the actual mesh rather than drifting.
+          if (!m.geometry.boundingSphere) m.geometry.computeBoundingSphere();
+          const bc = m.geometry.boundingSphere.center;
+          const correction = bc.clone()
+            .multiply(m.scale)
+            .applyQuaternion(m.quaternion)
+            .multiplyScalar(-0.14);
+          o.position.copy(m.position).add(correction);
+          o.quaternion.copy(m.quaternion);
+          o.scale.set(m.scale.x*1.14, m.scale.y*1.14, m.scale.z*1.14);
+        }
+      }
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    // ═══════════════════════════════════════
+    // INIT
+    // ═══════════════════════════════════════
+    document.getElementById('project-name').value = currentProject().name;
+    applyProject(currentProject());
+    renderProjectList();
+    renderExtraList();
+    updateWhaleUI();
+
+    // ═══════════════════════════════════════
+    // NAVIGATION
+    // ═══════════════════════════════════════
+    function showScreen(id) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      document.getElementById('btn-home').style.display = id === 'editor-view' ? 'block' : 'none';
+    }
+    window.__goHome = () => showScreen('homepage');
+
+    document.getElementById('btn-go-editor').addEventListener('click',   () => showScreen('editor-view'));
+    document.getElementById('btn-go-patterns').addEventListener('click',  () => showScreen('patterns-screen'));
+    document.getElementById('btn-go-help').addEventListener('click',      () => showScreen('help-screen'));
+    document.getElementById('btn-patterns-back').addEventListener('click',() => showScreen('homepage'));
+    document.getElementById('btn-help-back').addEventListener('click',    () => showScreen('homepage'));
+  </script>
+</body>
+</html>
