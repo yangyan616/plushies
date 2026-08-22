@@ -162,7 +162,7 @@
     }
 
     /* ── HELP / PATTERNS SCREENS ── */
-    #help-screen, #patterns-screen {
+    #help-screen, #patterns-screen, #newcrocheter-screen {
       flex-direction: column;
       background: linear-gradient(145deg, #fff0f8 0%, #f0e8ff 55%, #e8f8f4 100%);
     }
@@ -199,6 +199,7 @@
       display: flex;
       flex-direction: column;
       overflow-y: auto;
+      overflow-x: hidden;
       box-shadow: var(--shadow);
     }
     .panel:last-child { border-right: none; border-left: 2px solid var(--border); }
@@ -355,19 +356,15 @@
       box-shadow: 0 0 0 3px rgba(192,160,232,0.2);
     }
     #btn-name-confirm {
-      padding: 7px 0; border: none; border-radius: var(--radius-pill);
+      padding: 7px 13px; border: none; border-radius: var(--radius-pill);
       background: #6abf6f; color: white;
-      font-size: 1rem; font-weight: 900; cursor: pointer;
-      opacity: 0; pointer-events: none; white-space: nowrap;
-      max-width: 0; overflow: hidden;
-      transition: opacity 0.15s, max-width 0.15s, padding 0.15s;
-      flex-shrink: 0;
+      font-size: 0.88rem; font-weight: 900; cursor: pointer;
+      white-space: nowrap; flex-shrink: 0;
+      transition: transform 0.12s, opacity 0.15s;
+      opacity: 0.55;
     }
-    #btn-name-confirm.visible {
-      opacity: 1; pointer-events: auto;
-      max-width: 60px; padding: 7px 13px;
-    }
-    #btn-name-confirm:hover { transform: scale(1.08); }
+    #btn-name-confirm.visible { opacity: 1; }
+    #btn-name-confirm:hover { transform: scale(1.08); opacity: 1; }
     #btn-save {
       padding: 8px 16px;
       background: linear-gradient(135deg, var(--lav-dk), var(--blush-dk));
@@ -651,6 +648,36 @@
     }
     #confirm-cancel:hover { background: var(--lavender); transform: scale(1.04); }
 
+    /* ── PATTERNS NOTE MODAL ── */
+    #patterns-note-overlay { z-index: 1000; }
+    #patterns-note-box {
+      background: var(--panel-bg); border-radius: var(--radius-lg); padding: 30px 28px 24px;
+      width: 360px; max-width: 92vw;
+      box-shadow: var(--shadow-lg);
+      animation: pop-in 0.18s ease;
+      border: 2px solid var(--border);
+      text-align: center;
+    }
+    #patterns-note-title {
+      font-size: 1.05rem; font-weight: 800; color: var(--text);
+      margin-bottom: 14px;
+    }
+    #patterns-note-msg {
+      font-size: 0.88rem; color: var(--text-mid); line-height: 1.7;
+      font-weight: 600; margin-bottom: 22px;
+    }
+    #patterns-note-ok {
+      padding: 10px 32px;
+      background: linear-gradient(135deg, var(--blush-dk), var(--lav-dk));
+      color: white; border: none; border-radius: var(--radius-pill);
+      font-size: 0.92rem; font-weight: 800; cursor: pointer;
+      font-family: 'Baloo 2', sans-serif;
+      box-shadow: 0 4px 14px rgba(196,130,200,0.3);
+      transition: transform 0.14s, box-shadow 0.14s;
+    }
+    #patterns-note-ok:hover { transform: scale(1.05); box-shadow: 0 6px 20px rgba(196,130,200,0.4); }
+    #patterns-note-ok:active { transform: scale(0.97); }
+
     /* ── TOAST ── */
     #toast {
       position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
@@ -705,6 +732,26 @@
       cursor: default; opacity: 0.55;
       box-shadow: 0 3px 10px rgba(196,130,200,0.25);
     }
+    #newcrocheter-links {
+      display: flex; flex-direction: column; gap: 18px; width: 100%; max-width: 420px;
+    }
+    .newcro-card {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 28px 24px; gap: 8px; text-decoration: none;
+      background: white; border-radius: var(--radius-lg);
+      border: 2px solid var(--border);
+      box-shadow: 0 4px 18px rgba(180,120,160,0.12);
+      transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
+    }
+    .newcro-card:hover {
+      background: linear-gradient(135deg, var(--blush) 0%, var(--lavender) 100%);
+      border-color: var(--lav-dk); transform: translateY(-3px);
+      box-shadow: 0 8px 28px rgba(180,120,160,0.22);
+    }
+    .newcro-icon  { font-size: 2rem; }
+    .newcro-label { font-size: 1.05rem; font-weight: 800; color: var(--text); text-align: center; }
+    .newcro-sub   { font-size: 0.82rem; font-weight: 600; color: var(--text-lt); }
+
     #patterns-empty {
       color: var(--text-lt); font-size: 1rem; font-weight: 600;
       font-style: italic; padding: 40px;
@@ -732,7 +779,18 @@
       border-radius: var(--radius-lg) var(--radius-lg) 0 0;
       flex-shrink: 0;
     }
+    #pattern-doc-title-row { display: flex; align-items: center; gap: 10px; flex: 1; flex-wrap: wrap; }
     #pattern-doc-title { font-size: 1.05rem; font-weight: 800; color: var(--text); }
+    #pattern-doc-tabs { display: flex; gap: 6px; }
+    .pattern-tab-btn {
+      padding: 5px 12px; border-radius: var(--radius-pill);
+      background: rgba(255,255,255,0.50); border: 1.5px solid rgba(255,255,255,0.6);
+      font-family: inherit; font-size: 0.76rem; font-weight: 800; cursor: pointer;
+      color: var(--text-mid); white-space: nowrap;
+      transition: background 0.13s, transform 0.12s, border-color 0.13s;
+    }
+    .pattern-tab-btn:hover { background: white; transform: scale(1.04); }
+    .pattern-tab-btn.active { background: white; color: var(--text); border-color: var(--lav-dk); box-shadow: 0 2px 8px rgba(192,160,232,0.20); }
     #pattern-doc-actions { display: flex; gap: 8px; }
     .pattern-doc-btn {
       padding: 7px 16px; border: none; border-radius: var(--radius-pill);
@@ -785,6 +843,16 @@
       font-size: 0.82rem; color: var(--text); line-height: 1.75;
       white-space: pre-wrap; user-select: text;
     }
+    .part-copy-btn {
+      padding: 4px 10px; border: none; border-radius: var(--radius-pill);
+      background: var(--mint); color: var(--text-mid);
+      font-family: inherit; font-size: 0.72rem; font-weight: 800;
+      cursor: pointer; flex-shrink: 0; white-space: nowrap;
+      transition: transform 0.12s, background 0.12s, color 0.12s;
+      margin-left: 4px;
+    }
+    .part-copy-btn:hover { background: var(--mint-dk); color: white; transform: scale(1.06); }
+    .part-copy-btn.copied { background: var(--mint-dk); color: white; }
   </style>
 </head>
 <body>
@@ -1137,6 +1205,7 @@
     <div class="subscreen-header">
       <button class="subscreen-back" id="btn-patterns-back">← Back</button>
       <span class="subscreen-title">🧶 Patterns</span>
+      <button class="subscreen-back" id="btn-new-crocheter">New crocheter?</button>
     </div>
     <div class="subscreen-body">
       <div id="patterns-grid"></div>
@@ -1157,6 +1226,33 @@
         To see the pattern for your plushies, click on the <strong>Patterns</strong> button on the homescreen.
         Let your creativity flow and your crochet plushie building dreams come true!
       </p>
+    </div>
+  </div>
+
+  <!-- NEW CROCHETER SCREEN -->
+  <div id="newcrocheter-screen" class="screen">
+    <div class="subscreen-header">
+      <button class="subscreen-back" id="btn-newcrocheter-back">← Back</button>
+      <span class="subscreen-title">🧵 New Crocheter?</span>
+    </div>
+    <div class="subscreen-body">
+      <div id="newcrocheter-links">
+        <a class="newcro-card" href="https://youtu.be/aAxGTnVNJiE?si=c1II9TqacxYaMZOJ" target="_blank" rel="noopener">
+          <div class="newcro-icon">🎬</div>
+          <div class="newcro-label">Absolute Beginner Tutorial</div>
+          <div class="newcro-sub">Watch on YouTube →</div>
+        </a>
+        <a class="newcro-card" href="https://youtu.be/8aK_OSjwECU?si=d0XEcsb89-7EV1TY" target="_blank" rel="noopener">
+          <div class="newcro-icon">💫</div>
+          <div class="newcro-label">Magic Ring Tutorial</div>
+          <div class="newcro-sub">Watch on YouTube →</div>
+        </a>
+        <a class="newcro-card" href="https://youtu.be/BYIfrnJB5i8?si=tx3SQCj6E8Fd2oLk" target="_blank" rel="noopener">
+          <div class="newcro-icon">🐳</div>
+          <div class="newcro-label">First Plushie Tutorial</div>
+          <div class="newcro-sub">Watch on YouTube →</div>
+        </a>
+      </div>
     </div>
   </div>
 
@@ -1189,13 +1285,29 @@
   <div id="pattern-doc-overlay">
     <div id="pattern-doc-panel">
       <div id="pattern-doc-header">
-        <span id="pattern-doc-title">Pattern</span>
+        <div id="pattern-doc-title-row">
+          <span id="pattern-doc-title">Pattern</span>
+          <div id="pattern-doc-tabs">
+            <button class="pattern-tab-btn active" id="tab-parts">Parts</button>
+            <button class="pattern-tab-btn" id="tab-materials">Materials</button>
+            <button class="pattern-tab-btn" id="tab-key">Key</button>
+          </div>
+        </div>
         <div id="pattern-doc-actions">
           <button class="pattern-doc-btn" id="btn-copy-pattern">📋 Copy</button>
           <button class="pattern-doc-btn" id="btn-close-pattern">✕ Close</button>
         </div>
       </div>
       <div id="pattern-doc-body"></div>
+    </div>
+  </div>
+
+  <!-- PATTERNS NOTE MODAL -->
+  <div id="patterns-note-overlay" class="modal-overlay">
+    <div id="patterns-note-box">
+      <div id="patterns-note-title">📋 NOTE</div>
+      <p id="patterns-note-msg">This app is still in testing so patterns may be larger, smaller, or a slightly different shape than expected, and do note that size of the final plushie heavily depends on yarn and hook size. Scaling pattern with size is still in development, we thank you for your understanding.</p>
+      <button id="patterns-note-ok">OK</button>
     </div>
   </div>
 
@@ -1268,6 +1380,7 @@
       { id:'cattail',     label:'Cat Tail',    icon:'〜', base:[0.90,0.90,0.90], shape:'hemi',  color:'#f4b8d4', embed:0.28,  spawnDir:[0,-0.9,-1.6] },
       { id:'bobblestitch',label:'Bobble Stitch',icon:'◉',  base:[0.10,0.10,0.10], shape:'hemi',  color:'#f4b8d4', embed:0.10 },
       { id:'whaletail',   label:'Whale Tail',  icon:'〜', base:[0.55,0.55,0.55], shape:'hemi',  color:'#f4b8d4', embed:0.05, spawnDir:[0,-0.5,-1] },
+      { id:'hairtuff',    label:'Hair Tuft',   icon:'〜', base:[0.18,0.18,0.18], shape:'hemi',  color:'#f4b8d4', embed:0.05, spawnDir:[0,1,0.3] },
       { id:'dorsalfin',   label:'Dorsal Fin',  icon:'▲', base:[0.55,0.55,0.55], shape:'hemi',  color:'#f4b8d4', embed:0.12, spawnDir:[0,1,0] },
       { id:'wing',        label:'Wing',        icon:'○', base:[0.60,0.60,0.60], shape:'hemi',  color:'#ffffff', embed:0.08, spawnDir:[0,1,0.5], doubleSide:true },
     ];
@@ -1370,7 +1483,7 @@
         ep('eye',  'Right Eye',     '#1a1a2e', 0.80, [ 0.60, -0.22, 1.0]),
         ep('limb',      'Left Flipper',  '#f4b8d4', 0.80, [-1.0,  -0.31, 0.0]),
         ep('limb',      'Right Flipper', '#f4b8d4', 0.80, [ 1.0,  -0.31, 0.0]),
-        ep('whaletail', 'Whale Tail',    '#f4b8d4', 1.00, [ 0.0,  -0.40, -1.0], { rotation: Math.PI / 2 }),
+        ep('whaletail', 'Whale Tail',    '#f4b8d4', 1.00, [ 0.0,  -0.40, -1.0], { rotation: 0 }),
       ];
     }
 
@@ -1457,6 +1570,10 @@
       // Reset cached positions for face parts so they re-snap to the head
       proj.extraParts.forEach(ep => {
         if (ep.catalogId === 'eye' || ep.catalogId === 'mouth') { ep.customPos = null; ep.customNormal = null; }
+      });
+      // Reset whale tail so it re-snaps with correct rotation
+      proj.extraParts.forEach(ep => {
+        if (ep.catalogId === 'whaletail') { ep.rotation = 0; ep.customPos = null; ep.customNormal = null; }
       });
       // Migrate old fixed limbs → extra parts (only if no limb extra parts exist yet)
       const hasLimbEPs = proj.extraParts.some(ep => ep.catalogId === 'limb');
@@ -1959,9 +2076,6 @@ const _snapRay = new THREE.Raycaster();
       if (proj.bodyShape === 'loaf' || proj.bodyShape === 'bee')
         // loafGeo: horizontal pill squished along its length (X), big round face in YZ
         return [def.base[0]*s*0.86, def.base[1]*s*0.85, def.base[2]*s*0.82];
-      if (proj.bodyShape === 'whale')
-        // Perfectly round ball
-        return [def.base[0]*s, def.base[0]*s, def.base[0]*s];
       return [def.base[0]*s, def.base[1]*s, def.base[2]*s];
     }
     function getHeadPos(proj) {
@@ -2199,9 +2313,9 @@ const _snapRay = new THREE.Raycaster();
       const proj = currentProject();
       if (!proj) return;
 
-      // Fixed parts (Head, Body) — no delete; hide Head entirely for loaf body
+      // Fixed parts (Head, Body) — no delete; hide Head entirely for loaf/whale body
       PART_DEFS.forEach(def => {
-        if ((proj.bodyShape === 'loaf' || proj.bodyShape === 'bee') && def.id === 'head') return;
+        if ((proj.bodyShape === 'loaf' || proj.bodyShape === 'bee' || proj.bodyShape === 'whale') && def.id === 'head') return;
         // Bee stripe rows added separately below
         const item = document.createElement('div');
         item.className = 'extra-part-item' + (def.id === selectedId ? ' active' : '');
@@ -2244,7 +2358,7 @@ const _snapRay = new THREE.Raycaster();
     function allMeshes() {
       const proj = currentProject();
       const out  = PART_DEFS
-        .filter(d => !((proj?.bodyShape === 'loaf' || proj?.bodyShape === 'bee') && d.id === 'head'))
+        .filter(d => !((proj?.bodyShape === 'loaf' || proj?.bodyShape === 'bee' || proj?.bodyShape === 'whale') && d.id === 'head'))
         .map(d => meshMap[d.id]).filter(Boolean);
       if (proj) proj.extraParts?.forEach(ep => { if (meshMap[ep.id]) out.push(meshMap[ep.id]); });
       if (proj?.bodyShape === 'bee') BEE_STRIPE_IDS.forEach(id => { if (meshMap[id]?.visible) out.push(meshMap[id]); });
@@ -2278,10 +2392,16 @@ const _snapRay = new THREE.Raycaster();
           m.material.emissive.set(0xffffff);
           m.material.emissiveIntensity = 0.10;
           if (o) o.visible = true;
+          // Sync whale belly so it glows with the body selection
+          const belly = id === 'body' ? m.userData.bellyMesh : null;
+          if (belly) belly.material.emissiveIntensity = 0.10;
         } else {
           m.material.emissive.set(0xffffff);
           m.material.emissiveIntensity = id === hoveredId ? 0.12 : 0;
           if (o) o.visible = false;
+          // Clear belly glow when body is deselected
+          const belly = id === 'body' ? m.userData.bellyMesh : null;
+          if (belly) belly.material.emissiveIntensity = 0;
         }
       });
     }
@@ -2331,6 +2451,7 @@ function getEmbedFactor(id) {
       if (catalogId === 'catnose') return catNoseGeo;
       if (catalogId === 'cattail')   return catTailGeo;
       if (catalogId === 'whaletail') return whaleTailGeo;
+      if (catalogId === 'hairtuff')  return whaleTailGeo;
       if (catalogId === 'dorsalfin') return dorsalFinGeo;
       if (catalogId === 'wing')      return wingGeo;
       if (CATALOG_HEMI.has(catalogId))  return hemiGeo;
@@ -2477,7 +2598,7 @@ function getEmbedFactor(id) {
     canvas.addEventListener('pointerdown', e => {
       if (e.button !== 0) return;
       const id = getMouseIntersect(e);
-      if (!id) return;
+      if (!id) { selectPart(null); return; }
       drag.partId = id; drag.startX = e.clientX;
       drag.startY = e.clientY; drag.active = false; drag.pointerId = e.pointerId;
       e.stopPropagation();
@@ -2749,8 +2870,31 @@ function getEmbedFactor(id) {
         plushieGroup.updateWorldMatrix(true, true);
         if (selectedId === 'body') {
           meshMap.body.scale.set(...getBodyScale(proj, s));
+          // Keep outline in sync immediately (don't wait for next animate frame)
+          if (outlineMeshes.body) outlineMeshes.body.scale.setScalar(meshMap.body.scale.x * 1.14);
           // Re-snap parts sitting on the body (limbs etc.)
           moveAttachedParts('body', new THREE.Vector3(0, 0, 0));
+          // Also re-snap extra parts with untracked parentId (null) that have a stored position
+          plushieGroup.updateWorldMatrix(true, true);
+          proj.extraParts?.forEach(ep => {
+            if (ep.parentId !== null || !ep.customPos || !ep.customNormal) return;
+            const m = meshMap[ep.id]; if (!m) return;
+            const n = new THREE.Vector3(...ep.customNormal).normalize();
+            _snapRay.set(new THREE.Vector3(...ep.customPos).addScaledVector(n, 3), n.clone().negate());
+            const hits = _snapRay.intersectObjects([meshMap.body]);
+            if (!hits.length) return;
+            const h = hits[0];
+            const newN = h.face.normal.clone().transformDirection(h.object.matrixWorld).normalize();
+            const base = getPartBase(ep.id);
+            const avg  = (base[0]+base[1]+base[2])/3 * getPartSize(ep.id);
+            const r    = isHemiPart(ep.id) ? -avg*getEmbedFactor(ep.id) : isSmilePart(ep.id) ? avg*0.07 : avg*0.85;
+            const newPos = h.point.clone().addScaledVector(newN, r);
+            m.position.copy(newPos);
+            applyOrientEP(ep.id, newN);
+            ep.customPos    = [newPos.x, newPos.y, newPos.z];
+            ep.customNormal = [newN.x, newN.y, newN.z];
+            ep.parentId     = 'body';
+          });
           // Head position depends on body size — reposition it, then follow with face parts
           const prevHeadPos = meshMap.head?.position.clone() ?? new THREE.Vector3();
           repositionHead(proj);
@@ -2888,7 +3032,7 @@ function getEmbedFactor(id) {
       { id:'classic', name:'Classic Doll', desc:'Balanced & round',       bodyShape:'normal', parts:{head:1.0, body:1.0} },
       { id:'bear',    name:'Bear',         desc:'Doll with muzzle & ears', bodyShape:'normal', parts:{head:1.0, body:1.0}, bearExtra:true },
       { id:'loaf',    name:'Loaf Cat',     desc:'Short thick pill',        bodyShape:'loaf',   parts:{body:1.15}, hideHead:true, loafExtra:true },
-      { id:'whale',   name:'Round Whale',  desc:'Chubby round ball',       bodyShape:'whale',  parts:{body:1.2},  hideHead:true, whaleExtra:true },
+      { id:'whale',   name:'Round Whale',  desc:'Chubby round ball',       bodyShape:'whale',  parts:{body:1.0},  hideHead:true, whaleExtra:true },
       { id:'bee',     name:'Bee',          desc:'Striped bee body',         bodyShape:'bee',    parts:{body:1.15}, hideHead:true, beeExtra:true },
     ];
 
@@ -3119,82 +3263,101 @@ function getEmbedFactor(id) {
     function getCatalogSVG(id) {
       const p = '#f4b8d4', pdk = '#edacc4', lav = '#c8b0e8';
       const svgs = {
-        limb: `<svg viewBox="0 0 44 52" width="36" height="44">
-          <rect x="13" y="6" width="18" height="40" rx="9" fill="${p}"/>
-          <rect x="17" y="9" width="7" height="12" rx="3.5" fill="white" opacity="0.35"/>
+        limb: `<svg viewBox="0 0 30 52" width="26" height="48">
+          <rect x="7" y="14" width="16" height="26" fill="${p}"/>
+          <ellipse cx="15" cy="14" rx="8" ry="8" fill="${p}"/>
+          <ellipse cx="15" cy="40" rx="8" ry="8" fill="${pdk}"/>
+          <ellipse cx="11" cy="11" rx="3.5" ry="4.5" fill="white" opacity="0.40"/>
         </svg>`,
-        ear: `<svg viewBox="0 0 44 36" width="44" height="36">
-          <path d="M6,32 A18,20 0 0,1 38,32" fill="${p}"/>
-          <ellipse cx="22" cy="32" rx="16" ry="5" fill="${pdk}"/>
-          <path d="M10,32 A14,15 0 0,1 34,32" fill="#fdd5e8"/>
+        ear: `<svg viewBox="0 0 44 32" width="44" height="32">
+          <path d="M4,28 A20,24 0 0,1 40,28 Z" fill="${p}"/>
+          <ellipse cx="22" cy="28" rx="18" ry="5.5" fill="${pdk}"/>
+          <ellipse cx="14" cy="18" rx="6" ry="7" fill="white" opacity="0.30"/>
         </svg>`,
-        horn: `<svg viewBox="0 0 44 48" width="36" height="44">
-          <polygon points="22,4 10,44 34,44" fill="#f5f0dc"/>
-          <polygon points="22,10 15,36 29,36" fill="white" opacity="0.45"/>
-          <ellipse cx="22" cy="44" rx="12" ry="4" fill="#e0d8b0"/>
+        horn: `<svg viewBox="0 0 36 48" width="30" height="44">
+          <polygon points="18,4 7,44 29,44" fill="#f5f0dc"/>
+          <polygon points="18,8 12,36 24,36" fill="white" opacity="0.38"/>
+          <ellipse cx="18" cy="44" rx="11" ry="3.5" fill="#ddd5a0"/>
+          <path d="M18,10 Q22,18 16,24 Q12,30 18,36" stroke="#ccc898" stroke-width="1.2" fill="none"/>
         </svg>`,
         snout: `<svg viewBox="0 0 44 38" width="44" height="38">
           <ellipse cx="22" cy="22" rx="18" ry="13" fill="#f9d0e0"/>
-          <ellipse cx="15" cy="20" rx="4.5" ry="3.5" fill="#c87890"/>
-          <ellipse cx="29" cy="20" rx="4.5" ry="3.5" fill="#c87890"/>
-          <ellipse cx="15" cy="20" rx="2" ry="1.5" fill="#5c2030" opacity="0.7"/>
-          <ellipse cx="29" cy="20" rx="2" ry="1.5" fill="#5c2030" opacity="0.7"/>
+          <ellipse cx="15" cy="22" rx="2.5" ry="6" fill="#c87890"/>
+          <ellipse cx="29" cy="22" rx="2.5" ry="6" fill="#c87890"/>
+          <ellipse cx="13" cy="14" rx="4" ry="4" fill="white" opacity="0.30"/>
         </svg>`,
         eye: `<svg viewBox="0 0 44 44" width="40" height="40">
-          <circle cx="22" cy="22" r="14" fill="#2a1a3e"/>
-          <circle cx="22" cy="22" r="8" fill="#120a1e"/>
-          <circle cx="27" cy="17" r="4" fill="white"/>
-          <circle cx="27" cy="17" r="2" fill="white" opacity="0.5"/>
+          <circle cx="22" cy="22" r="16" fill="#2a1a3e"/>
+          <circle cx="22" cy="22" r="9" fill="#0c0618"/>
+          <circle cx="28" cy="15" r="5" fill="white"/>
+          <circle cx="29" cy="16" r="2" fill="white" opacity="0.55"/>
         </svg>`,
-        mouth: `<svg viewBox="0 0 44 30" width="44" height="30">
-          <path d="M8,10 Q22,28 36,10" stroke="#2a1a3e" stroke-width="4" fill="none" stroke-linecap="round"/>
+        mouth: `<svg viewBox="0 0 44 28" width="44" height="28">
+          <path d="M6,8 Q22,26 38,8" stroke="#2a1a3e" stroke-width="4.5" fill="none" stroke-linecap="round"/>
         </svg>`,
-        beak: `<svg viewBox="0 0 44 38" width="44" height="38">
-          <polygon points="8,6 8,32 40,19" fill="#f5a025"/>
-          <polygon points="8,19 40,19 8,32" fill="#e08818" opacity="0.4"/>
-          <line x1="8" y1="19" x2="40" y2="19" stroke="#c87010" stroke-width="1.5"/>
+        beak: `<svg viewBox="0 0 44 36" width="44" height="36">
+          <path d="M5,11 L40,18 L5,18 Z" fill="#f5a025"/>
+          <path d="M5,18 L40,18 L5,26 Z" fill="#e08818"/>
+          <line x1="5" y1="18" x2="40" y2="18" stroke="#c07010" stroke-width="1.5"/>
+          <ellipse cx="18" cy="14" rx="6" ry="3" fill="white" opacity="0.22"/>
         </svg>`,
         nose: `<svg viewBox="0 0 44 36" width="40" height="32">
-          <ellipse cx="22" cy="20" rx="11" ry="8" fill="#1a0800"/>
-          <ellipse cx="26" cy="17" rx="3.5" ry="2.5" fill="white" opacity="0.25"/>
+          <path d="M8,26 A14,16 0 0,1 36,26 Z" fill="#1a0800"/>
+          <ellipse cx="22" cy="26" rx="14" ry="4" fill="#0a0400"/>
+          <ellipse cx="16" cy="20" rx="4" ry="4" fill="white" opacity="0.18"/>
         </svg>`,
-        muzzle: `<svg viewBox="0 0 44 32" width="44" height="32">
-          <path d="M4,28 Q12,6 22,4 Q32,6 40,28 Z" fill="#f0ddb0"/>
-          <ellipse cx="22" cy="28" rx="18" ry="5" fill="#dcc890"/>
-          <ellipse cx="22" cy="14" rx="10" ry="6" fill="white" opacity="0.25"/>
+        muzzle: `<svg viewBox="0 0 44 36" width="44" height="36">
+          <path d="M4,30 Q4,8 22,8 Q40,8 40,30 Z" fill="#f0ddb0"/>
+          <ellipse cx="22" cy="30" rx="18" ry="5.5" fill="#dcc890"/>
+          <ellipse cx="14" cy="18" rx="6" ry="6" fill="white" opacity="0.28"/>
         </svg>`,
         catear: `<svg viewBox="0 0 44 48" width="38" height="44">
-          <polygon points="22,4 4,46 40,46" fill="${p}"/>
-          <polygon points="22,12 10,40 34,40" fill="#fce0ec"/>
-          <ellipse cx="22" cy="46" rx="18" ry="4" fill="${pdk}"/>
+          <polygon points="22,4 4,44 40,44" fill="${p}"/>
+          <polygon points="22,14 10,40 34,40" fill="#fce0ec"/>
+          <ellipse cx="22" cy="44" rx="18" ry="4.5" fill="${pdk}"/>
+          <ellipse cx="16" cy="22" rx="3" ry="5" fill="white" opacity="0.25"/>
         </svg>`,
         bearear: `<svg viewBox="0 0 44 44" width="40" height="40">
-          <circle cx="22" cy="22" r="18" fill="${p}"/>
-          <circle cx="22" cy="22" r="11" fill="${pdk}"/>
-          <circle cx="27" cy="17" r="4" fill="white" opacity="0.3"/>
+          <circle cx="22" cy="22" r="19" fill="${p}"/>
+          <circle cx="22" cy="22" r="12" fill="${pdk}"/>
+          <circle cx="15" cy="16" r="5" fill="white" opacity="0.30"/>
         </svg>`,
-        catnose: `<svg viewBox="0 0 44 36" width="40" height="32">
-          <path d="M22,32 C16,32 6,16 10,12 C14,8 30,8 34,12 C38,16 28,32 22,32 Z" fill="#7a2550"/>
-          <ellipse cx="22" cy="14" rx="9" ry="4" fill="#9a3570" opacity="0.5"/>
+        catnose: `<svg viewBox="0 0 44 40" width="40" height="36">
+          <path d="M22,10 C18,10 8,14 8,22 C8,28 14,32 22,30 C30,32 36,28 36,22 C36,14 26,10 22,10 Z" fill="#7a2550"/>
+          <line x1="22" y1="30" x2="22" y2="40" stroke="#7a2550" stroke-width="2.5" stroke-linecap="round"/>
+          <ellipse cx="16" cy="18" rx="4" ry="3" fill="#aa4070" opacity="0.50"/>
         </svg>`,
         cattail: `<svg viewBox="0 0 44 52" width="36" height="48">
-          <path d="M22,48 C8,38 36,28 22,18 C12,10 8,6 12,4" stroke="${p}" stroke-width="7" fill="none" stroke-linecap="round"/>
-          <path d="M22,48 C8,38 36,28 22,18 C12,10 8,6 12,4" stroke="white" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.3"/>
+          <path d="M26,48 C10,44 40,32 24,20 C12,12 8,6 16,4" stroke="${p}" stroke-width="8" fill="none" stroke-linecap="round"/>
+          <path d="M26,48 C10,44 40,32 24,20 C12,12 8,6 16,4" stroke="white" stroke-width="3.5" fill="none" stroke-linecap="round" opacity="0.28"/>
         </svg>`,
-        bobblestitch: `<svg viewBox="0 0 44 32" width="44" height="32">
-          <path d="M10,26 A14,16 0 0,1 34,26" fill="${p}"/>
-          <ellipse cx="22" cy="26" rx="12" ry="4" fill="${pdk}"/>
-          <path d="M14,26 A10,11 0 0,1 30,26" fill="white" opacity="0.3"/>
+        bobblestitch: `<svg viewBox="0 0 44 32" width="44" height="28">
+          <path d="M7,26 A15,17 0 0,1 37,26 Z" fill="${p}"/>
+          <ellipse cx="22" cy="26" rx="15" ry="4.5" fill="${pdk}"/>
+          <ellipse cx="15" cy="18" rx="4.5" ry="5.5" fill="white" opacity="0.35"/>
+        </svg>`,
+        hairtuff: `<svg viewBox="0 0 44 36" width="40" height="32">
+          <path d="M22,32 C22,22 10,16 13,6" stroke="${p}" stroke-width="5.5" fill="none" stroke-linecap="round"/>
+          <path d="M22,32 C20,20 22,12 22,4" stroke="${p}" stroke-width="5.5" fill="none" stroke-linecap="round"/>
+          <path d="M22,32 C22,22 34,16 31,6" stroke="${p}" stroke-width="5.5" fill="none" stroke-linecap="round"/>
         </svg>`,
         whaletail: `<svg viewBox="0 0 56 36" width="52" height="32">
-          <!-- left lobe -->
-          <path d="M22,8 C16,6 4,10 3,20 C2,28 12,30 22,22" fill="${p}"/>
-          <path d="M22,8 C16,8 6,12 6,20 C6,26 14,27 22,22" fill="white" opacity="0.25"/>
-          <!-- right lobe -->
-          <path d="M34,8 C40,6 52,10 53,20 C54,28 44,30 34,22" fill="${p}"/>
-          <path d="M34,8 C40,8 50,12 50,20 C50,26 42,27 34,22" fill="white" opacity="0.25"/>
-          <!-- stem connector -->
-          <path d="M22,8 Q28,14 34,8 Q30,20 34,22 Q28,26 22,22 Q26,20 22,8 Z" fill="${pdk}"/>
+          <path d="M22,8 C14,4 2,10 2,20 C2,28 12,32 22,22" fill="${p}"/>
+          <path d="M22,8 C15,6 5,12 5,20 C5,26 13,28 22,22" fill="white" opacity="0.25"/>
+          <path d="M34,8 C42,4 54,10 54,20 C54,28 44,32 34,22" fill="${p}"/>
+          <path d="M34,8 C41,6 51,12 51,20 C51,26 43,28 34,22" fill="white" opacity="0.25"/>
+          <path d="M22,22 Q28,30 34,22 Q30,14 28,8 Q26,14 22,22 Z" fill="${pdk}"/>
+        </svg>`,
+        dorsalfin: `<svg viewBox="0 0 44 46" width="38" height="42">
+          <path d="M6,40 C6,40 10,10 18,4 C26,8 34,28 38,40 Z" fill="${p}"/>
+          <path d="M9,40 C9,40 13,14 18,8 C23,14 30,32 35,40 Z" fill="white" opacity="0.22"/>
+          <ellipse cx="22" cy="40" rx="16" ry="4" fill="${pdk}"/>
+        </svg>`,
+        wing: `<svg viewBox="0 0 52 38" width="48" height="34">
+          <path d="M4,30 C4,14 18,6 34,8 C46,10 50,22 46,30 Z" fill="${p}"/>
+          <path d="M10,28 C12,18 22,10 34,12" stroke="white" stroke-width="1.5" fill="none" opacity="0.40"/>
+          <path d="M8,30 C10,20 20,12 32,14" stroke="white" stroke-width="1.5" fill="none" opacity="0.40"/>
+          <ellipse cx="16" cy="16" rx="6" ry="5" fill="white" opacity="0.28"/>
         </svg>`,
       };
       return svgs[id] ?? `<svg viewBox="0 0 44 44" width="40" height="40"><circle cx="22" cy="22" r="14" fill="${p}"/></svg>`;
@@ -3319,6 +3482,23 @@ function getEmbedFactor(id) {
       if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
         e.preventDefault();
         undo();
+      }
+      // R key: rotate selected extra part by 15°
+      if (e.key === 'r' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        const focused = document.activeElement;
+        if (focused && (focused.tagName === 'INPUT' || focused.tagName === 'TEXTAREA')) return;
+        if (!selectedId || !isExtraPart(selectedId)) return;
+        const ep = getEP(selectedId);
+        if (!ep) return;
+        pushUndo();
+        ep.rotation = ((ep.rotation ?? 0) + 15 * Math.PI / 180) % (2 * Math.PI);
+        rotationInput.value = Math.round(ep.rotation * 180 / Math.PI);
+        rotationVal.textContent = rotationInput.value + '°';
+        if (ep.customNormal) {
+          const n = new THREE.Vector3(...ep.customNormal);
+          applyOrientEP(selectedId, n);
+        }
+        e.preventDefault();
       }
     });
 
@@ -3477,22 +3657,53 @@ R13: [4 sc, dec] x6 (30)
 R14: [3 sc, dec] x6 (24)
 R15: [2 sc, dec] x6 (18)
 R16: [sc, dec] x6 (12)
-R17: dec around (6)`,
+Stuff firmly.
+FO`,
+      limb: `R1: 6 sc in MR (6)
+R2: inc around (12)
+R3-R6: sc (12)
+Stuff
+(Optional) Flatten the opening and sl st across to close.
+FO, leave a long tail for sewing.`,
+      body: `R1: 6 sc in MR (6)
+R2: inc around (12)
+R3: [sc, inc] x6 (18)
+R4: [2 sc, inc] x6 (24)
+R5: [3 sc, inc] x6 (30)
+R6: [4 sc, inc] x6 (36)
+R7: [5 sc, inc] x6 (42)
+R8–17: sc around (42)
+R18: [5 sc, dec] x6 (36)
+R19: [4 sc, dec] x6 (30)
+R20: [3 sc, dec] x6 (24)
+R21: [2 sc, dec] x6 (18)
+R22: [sc, dec] x6 (12)
+Stuff firmly.
+FO, leave a long tail for sewing.`,
     };
 
-    function openPatternDoc(proj) {
-      document.getElementById('pattern-doc-title').textContent = `🧶 ${proj.name || 'Untitled'} — Parts List`;
+    let patternDocProj = null;
+    let patternDocTab  = 'parts';
 
+    function renderPatternTab() {
       const body = document.getElementById('pattern-doc-body');
       body.innerHTML = '';
+      ['parts','materials','key'].forEach(t => {
+        const el = document.getElementById('tab-' + t);
+        if (el) el.classList.toggle('active', t === patternDocTab);
+      });
+      if (patternDocTab === 'parts')     renderPartsTab(patternDocProj, body);
+      else if (patternDocTab === 'materials') renderMaterialsTab(patternDocProj, body);
+      else renderKeyTab(body);
+    }
 
+    function renderPartsTab(proj, body) {
       function addSection(title) {
         const h = document.createElement('div');
         h.className = 'pattern-section-title';
         h.textContent = title;
         body.appendChild(h);
       }
-
       function addRow(label, color, meta, patternKey) {
         const wrap = document.createElement('div');
         wrap.className = 'pattern-part-block';
@@ -3507,7 +3718,20 @@ R17: dec around (6)`,
         const metaEl = document.createElement('div');
         metaEl.className = 'pattern-part-meta';
         metaEl.textContent = meta || '';
-        row.append(swatch, name, metaEl);
+        const copyBtn = document.createElement('button');
+        copyBtn.className = 'part-copy-btn';
+        copyBtn.textContent = '📋';
+        copyBtn.title = `Copy pattern for ${label}`;
+        copyBtn.addEventListener('click', () => {
+          const patText = patternKey ? PART_PATTERNS[patternKey] : null;
+          const text = `${label}\n\n${patText ?? '(no pattern available)'}`;
+          navigator.clipboard.writeText(text.trim()).then(() => {
+            copyBtn.textContent = '✓';
+            copyBtn.classList.add('copied');
+            setTimeout(() => { copyBtn.textContent = '📋'; copyBtn.classList.remove('copied'); }, 1600);
+          });
+        });
+        row.append(swatch, name, metaEl, copyBtn);
         const patSection = document.createElement('div');
         patSection.className = 'pattern-instructions';
         const patText = patternKey ? PART_PATTERNS[patternKey] : null;
@@ -3515,51 +3739,146 @@ R17: dec around (6)`,
         wrap.append(row, patSection);
         body.appendChild(wrap);
       }
-
-      // Body style info
       const shapeLabel = BODY_SHAPE_LABELS[proj.bodyShape] ?? 'Classic Doll';
       addSection(`Body Style: ${shapeLabel}`);
-
-      // Fixed parts
-      addSection('Fixed Parts');
+      addSection('Body Parts');
       PART_DEFS.forEach(def => {
         const state = proj.parts[def.id];
         if (!state || state.hidden) return;
         if ((proj.bodyShape === 'loaf' || proj.bodyShape === 'bee' || proj.bodyShape === 'whale') && def.id === 'head') return;
         addRow(def.label, state.color, `Size: ${(state.size || 1).toFixed(2)}×`, def.id);
       });
-
-      // Bee stripes
       if (proj.bodyShape === 'bee' && proj.beeStripeColors) {
         proj.beeStripeColors.forEach((col, i) => addRow(`Stripe ${i + 1}`, col, ''));
       }
+      proj.extraParts?.forEach(ep => {
+        if (ep.catalogId === 'eye' || ep.catalogId === 'nose' || ep.catalogId === 'catnose') return;
+        const cat = CATALOG.find(c => c.id === ep.catalogId);
+        let meta = `Size: ${(ep.size || 1).toFixed(2)}×`;
+        if (ep.catalogId === 'limb') meta += ` | Length: ${(ep.limbLength ?? 1).toFixed(2)}× | Width: ${(ep.limbWidth ?? 1).toFixed(2)}×`;
+        addRow(ep.label ?? cat?.label ?? ep.catalogId, ep.color, meta, ep.catalogId);
+      });
+    }
 
-      // Extra parts
-      if (proj.extraParts?.length) {
-        addSection('Extra Parts');
-        proj.extraParts.forEach(ep => {
-          const cat = CATALOG.find(c => c.id === ep.catalogId);
-          let meta = `Size: ${(ep.size || 1).toFixed(2)}×`;
-          if (ep.catalogId === 'limb') meta += ` | Length: ${(ep.limbLength ?? 1).toFixed(2)}× | Width: ${(ep.limbWidth ?? 1).toFixed(2)}×`;
-          addRow(ep.label ?? cat?.label ?? ep.catalogId, ep.color, meta);
-        });
+    function renderMaterialsTab(proj, body) {
+      function section(title) {
+        const h = document.createElement('div');
+        h.className = 'pattern-section-title';
+        h.textContent = title;
+        body.appendChild(h);
+      }
+      function row(html) {
+        const d = document.createElement('div');
+        d.className = 'pattern-part-row';
+        d.style.gap = '10px';
+        d.innerHTML = html;
+        body.appendChild(d);
       }
 
+      section('General Supplies');
+      const _supplies = [
+        'Crochet hook (size depends on yarn)',
+        'Polyester fiberfill stuffing',
+        'Yarn needle for sewing & weaving ends',
+        'Scissors',
+        'Stitch markers',
+        (() => { const n = (proj.extraParts ?? []).filter(ep => ep.catalogId === 'eye').length; return n > 0 ? `Safety eyes ×${n}` : 'Safety eyes'; })(),
+      ];
+      const _noseCount    = (proj.extraParts ?? []).filter(ep => ep.catalogId === 'nose').length;
+      const _catNoseCount = (proj.extraParts ?? []).filter(ep => ep.catalogId === 'catnose').length;
+      if (_noseCount    > 0) _supplies.push(`Nose ×${_noseCount}`);
+      if (_catNoseCount > 0) _supplies.push(`Cat Nose ×${_catNoseCount}`);
+      _supplies.forEach(item => row(`<span class="pattern-part-name">${item}</span>`));
+
+      // Collect unique colors with part names
+      const colorMap = new Map(); // hex → [label, ...]
+      const add = (hex, label) => {
+        const k = hex.toLowerCase();
+        if (!colorMap.has(k)) colorMap.set(k, []);
+        colorMap.get(k).push(label);
+      };
+      PART_DEFS.forEach(def => {
+        const state = proj.parts[def.id];
+        if (!state || state.hidden) return;
+        if ((proj.bodyShape === 'loaf' || proj.bodyShape === 'bee' || proj.bodyShape === 'whale') && def.id === 'head') return;
+        add(state.color, def.label);
+      });
+      if (proj.bellyColor) add(proj.bellyColor, 'Belly');
+      (proj.beeStripeColors ?? []).forEach((col, i) => add(col, `Stripe ${i+1}`));
+      (proj.extraParts ?? []).forEach(ep => {
+        if (ep.catalogId === 'eye' || ep.catalogId === 'nose' || ep.catalogId === 'catnose') return;
+        const cat = CATALOG.find(c => c.id === ep.catalogId);
+        add(ep.color, ep.label ?? cat?.label ?? ep.catalogId);
+      });
+
+      section('Yarn Colors');
+      colorMap.forEach((labels, hex) => {
+        row(`<div class="pattern-swatch" style="background:${hex};flex-shrink:0"></div>
+             <span class="pattern-part-name">${labels.join(', ')}</span>
+             <span class="pattern-color-hex">${hex}</span>`);
+      });
+    }
+
+    function renderKeyTab(body) {
+      function section(title) {
+        const h = document.createElement('div');
+        h.className = 'pattern-section-title';
+        h.textContent = title;
+        body.appendChild(h);
+      }
+      function entry(abbr, meaning) {
+        const d = document.createElement('div');
+        d.className = 'pattern-part-row';
+        d.innerHTML = `<span class="pattern-part-name" style="min-width:56px;font-family:monospace;font-size:0.88rem">${abbr}</span>
+                       <span style="font-size:0.85rem;color:var(--text-mid);font-weight:600;flex:1">${meaning}</span>`;
+        body.appendChild(d);
+      }
+      section('Abbreviations');
+      entry('MR',     'Magic ring');
+      entry('R N',    'Row N (e.g. R1, R2…)');
+      entry('ch',     'Chain');
+      entry('sl st',  'Slip stitch');
+      entry('sc',     'Single crochet');
+      entry('hdc',    'Half double crochet');
+      entry('dc',     'Double crochet');
+      entry('tr',     'Treble crochet');
+      entry('inc',    'Increase — 2 stitches in the same stitch');
+      entry('dec',    'Decrease — combine 2 stitches into 1');
+      entry('BLO',    'Back loop only');
+      entry('FLO',    'Front loop only');
+      entry('[…] ×N', 'Repeat the bracketed section N times');
+      entry('FO',     'Fasten off');
+    }
+
+    function openPatternDoc(proj) {
+      patternDocProj = proj;
+      patternDocTab  = 'parts';
+      document.getElementById('pattern-doc-title').textContent = `🧶 ${proj.name || 'Untitled'}`;
+      renderPatternTab();
       patternOverlay.classList.add('show');
     }
 
+    ['parts','materials','key'].forEach(t => {
+      document.getElementById('tab-' + t).addEventListener('click', () => {
+        patternDocTab = t;
+        renderPatternTab();
+      });
+    });
+
     document.getElementById('btn-copy-pattern').addEventListener('click', () => {
-      const rows = document.querySelectorAll('#pattern-doc-body .pattern-part-row');
       const title = document.getElementById('pattern-doc-title').textContent;
       let text = title + '\n' + '─'.repeat(40) + '\n\n';
-      let lastSection = '';
       document.querySelectorAll('#pattern-doc-body > *').forEach(el => {
         if (el.classList.contains('pattern-section-title')) {
           text += '\n' + el.textContent.toUpperCase() + '\n';
+        } else if (el.classList.contains('pattern-part-block')) {
+          const name = el.querySelector('.pattern-part-name')?.textContent ?? '';
+          text += `\n  ${name}\n`;
+          const pat = el.querySelector('.pattern-text')?.textContent;
+          if (pat) text += pat.split('\n').map(l => '    ' + l).join('\n') + '\n';
         } else if (el.classList.contains('pattern-part-row')) {
-          const name = el.querySelector('.pattern-part-name').textContent;
-          const meta = el.querySelector('.pattern-part-meta').textContent;
-          text += `  • ${name}${meta ? ' — ' + meta : ''}\n`;
+          const name = el.querySelector('.pattern-part-name')?.textContent ?? '';
+          text += `  • ${name}\n`;
         }
       });
       navigator.clipboard.writeText(text.trim()).then(() => {
@@ -3687,10 +4006,19 @@ R17: dec around (6)`,
     }
 
     document.getElementById('btn-go-editor').addEventListener('click',   () => showScreen('editor-view'));
-    document.getElementById('btn-go-patterns').addEventListener('click',  () => { showScreen('patterns-screen'); populatePatternsScreen(); });
+    document.getElementById('btn-go-patterns').addEventListener('click', () => {
+      showScreen('patterns-screen');
+      populatePatternsScreen();
+      document.getElementById('patterns-note-overlay').classList.add('show');
+    });
+    document.getElementById('patterns-note-ok').addEventListener('click', () => {
+      document.getElementById('patterns-note-overlay').classList.remove('show');
+    });
     document.getElementById('btn-go-help').addEventListener('click',      () => showScreen('help-screen'));
-    document.getElementById('btn-patterns-back').addEventListener('click',() => showHomepage());
-    document.getElementById('btn-help-back').addEventListener('click',    () => showHomepage());
+    document.getElementById('btn-patterns-back').addEventListener('click',   () => showHomepage());
+    document.getElementById('btn-help-back').addEventListener('click',       () => showHomepage());
+    document.getElementById('btn-new-crocheter').addEventListener('click',   () => showScreen('newcrocheter-screen'));
+    document.getElementById('btn-newcrocheter-back').addEventListener('click',() => showScreen('patterns-screen'));
     window.__goHome = () => { showScreen('homepage'); updateEditorBtnLabel(); };
 
     updateEditorBtnLabel();
