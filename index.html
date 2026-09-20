@@ -2,7 +2,18 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <!-- iOS Safari: set --app-h to actual visible height before first paint -->
+  <script>
+    (function() {
+      var fix = function() {
+        document.documentElement.style.setProperty('--app-h', window.innerHeight + 'px');
+      };
+      fix();
+      window.addEventListener('resize', fix);
+      window.addEventListener('orientationchange', function() { setTimeout(fix, 200); });
+    })();
+  </script>
   <title>Plushie Builder 🧸</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -48,14 +59,18 @@
       background: linear-gradient(145deg, #fff0f8 0%, #f0e8ff 50%, #e8f8f4 100%);
       overflow: hidden;
       color: var(--text);
-      width: 100vw; height: 100vh;
+      width: 100vw;
+      height: 100vh;
+      height: var(--app-h, 100vh);
     }
 
     /* ── SCREEN SYSTEM ── */
     .screen {
-      position: fixed; inset: 0;
+      position: fixed; top: 0; left: 0; right: 0;
       display: none;
-      width: 100%; height: 100%;
+      width: 100%;
+      height: 100vh;
+      height: var(--app-h, 100vh); /* iOS Safari: actual visible height */
     }
     .screen.active { display: flex; z-index: 500; }
     #editor-view.active { display: grid; z-index: 0; } /* editor sits below the home button */
@@ -156,9 +171,8 @@
 
     /* ── EDITOR VIEW ── */
     #editor-view {
-      display: grid;
       grid-template-columns: 226px 1fr 248px;
-      grid-template-rows: 100vh;
+      grid-template-rows: var(--app-h, 100vh);
     }
 
     /* ── HELP / PATTERNS SCREENS ── */
@@ -179,6 +193,12 @@
       transition: background 0.15s, transform 0.12s;
     }
     .subscreen-back:hover { background: var(--lavender); transform: scale(1.04); }
+    .btn-create-pattern {
+      background: linear-gradient(135deg, var(--blush-dk) 0%, var(--lav-dk) 100%);
+      color: white; border-color: transparent;
+      box-shadow: 0 4px 14px rgba(196,130,200,0.4);
+    }
+    .btn-create-pattern:hover { background: linear-gradient(135deg, var(--blush-dk) 0%, var(--lav-dk) 100%); color: white; box-shadow: 0 6px 20px rgba(196,130,200,0.5); }
     .subscreen-title {
       font-size: 1.15rem; font-weight: 800; color: var(--text);
     }
@@ -230,7 +250,7 @@
 
     #btn-home {
       display: none; /* shown only when editor is active */
-      position: fixed; top: 14px; left: calc(226px + 14px); z-index: 9999;
+      position: absolute; top: 14px; left: 14px; z-index: 10;
       background: white; border: 2px solid var(--border); cursor: pointer;
       font-size: 0.82rem; font-weight: 800; font-family: inherit;
       padding: 8px 16px; border-radius: var(--radius-pill);
@@ -261,6 +281,17 @@
     }
     .project-item:hover .del-btn { opacity: 1; }
     .project-item .del-btn:hover { color: #e07070; }
+    #view-pattern-float-btn {
+      position: fixed; z-index: 1000; display: none;
+      padding: 7px 14px;
+      background: linear-gradient(135deg, var(--blush-dk) 0%, var(--lav-dk) 100%);
+      color: white; border: none; border-radius: var(--radius-pill);
+      font-family: 'Baloo 2', sans-serif; font-size: 0.78rem; font-weight: 800;
+      cursor: pointer; white-space: nowrap;
+      box-shadow: 0 4px 14px rgba(196,130,200,0.4);
+      transition: transform 0.12s, box-shadow 0.12s;
+    }
+    #view-pattern-float-btn:hover { transform: scale(1.05); box-shadow: 0 6px 20px rgba(196,130,200,0.5); }
 
     /* ── SELECT MODE ── */
     #btn-select-mode {
@@ -532,6 +563,7 @@
     #catalog-panel {
       background: var(--panel-bg); border-radius: var(--radius-lg); padding: 26px;
       width: 380px; max-width: 94vw;
+      max-height: calc(var(--app-h, 100vh) - 40px); overflow-y: auto;
       box-shadow: var(--shadow-lg);
       animation: pop-in 0.18s ease;
       border: 2px solid var(--border);
@@ -575,6 +607,7 @@
     #body-presets-panel {
       background: var(--panel-bg); border-radius: var(--radius-lg); padding: 28px;
       width: 560px; max-width: 97vw;
+      max-height: calc(var(--app-h, 100vh) - 40px); overflow-y: auto;
       box-shadow: var(--shadow-lg);
       animation: pop-in 0.18s ease;
       border: 2px solid var(--border);
@@ -653,6 +686,8 @@
     #patterns-note-box {
       background: var(--panel-bg); border-radius: var(--radius-lg); padding: 30px 28px 24px;
       width: 360px; max-width: 92vw;
+      max-height: 88vh; max-height: calc(var(--app-h, 100vh) * 0.88);
+      overflow-y: auto;
       box-shadow: var(--shadow-lg);
       animation: pop-in 0.18s ease;
       border: 2px solid var(--border);
@@ -666,6 +701,13 @@
       font-size: 0.88rem; color: var(--text-mid); line-height: 1.7;
       font-weight: 600; margin-bottom: 22px;
     }
+    @media (max-width: 700px), (max-height: 600px) {
+      #patterns-note-box { padding: 18px 16px 16px; }
+      #patterns-note-title { font-size: 0.92rem; margin-bottom: 10px; }
+      #patterns-note-msg { font-size: 0.8rem; line-height: 1.55; margin-bottom: 14px; }
+      #patterns-note-ok { padding: 8px 24px; font-size: 0.82rem; }
+      #patterns-note-dismiss-row { margin-top: 10px; font-size: 0.76rem; }
+    }
     #patterns-note-ok {
       padding: 10px 32px;
       background: linear-gradient(135deg, var(--blush-dk), var(--lav-dk));
@@ -677,6 +719,12 @@
     }
     #patterns-note-ok:hover { transform: scale(1.05); box-shadow: 0 6px 20px rgba(196,130,200,0.4); }
     #patterns-note-ok:active { transform: scale(0.97); }
+    #patterns-note-dismiss-row {
+      display: flex; align-items: center; justify-content: center; gap: 7px;
+      margin-top: 14px; font-size: 0.82rem; font-weight: 600;
+      color: var(--text-lt); cursor: pointer;
+    }
+    #patterns-note-dismiss { accent-color: var(--lav-dk); cursor: pointer; }
 
     /* ── TOAST ── */
     #toast {
@@ -765,9 +813,25 @@
       display: none; align-items: center; justify-content: center; z-index: 600;
     }
     #pattern-doc-overlay.show { display: flex; animation: pop-in 0.18s ease; }
+    #pattern-doc-wrapper {
+      position: relative;
+      width: 560px; max-width: 96vw;
+    }
+    #btn-back-to-editor {
+      position: absolute; right: calc(100% + 12px); top: 18px;
+      display: flex; flex-direction: row; align-items: center; justify-content: center;
+      gap: 5px; width: 76px; padding: 10px 10px;
+      border: 2px solid rgba(255,255,255,0.7); border-radius: var(--radius-md);
+      background: white; color: var(--text); font-family: inherit;
+      font-size: 0.82rem; font-weight: 800; cursor: pointer;
+      box-shadow: 0 3px 12px rgba(180,120,160,0.18);
+      transition: background 0.15s, transform 0.12s;
+      line-height: 1.2;
+    }
+    #btn-back-to-editor:hover { background: var(--lavender); transform: scale(1.04); }
     #pattern-doc-panel {
       background: var(--panel-bg); border-radius: var(--radius-lg);
-      width: 560px; max-width: 96vw; max-height: 82vh;
+      width: 100%; max-height: 82vh;
       box-shadow: var(--shadow-lg); border: 2px solid var(--border);
       display: flex; flex-direction: column;
     }
@@ -853,6 +917,190 @@
     }
     .part-copy-btn:hover { background: var(--mint-dk); color: white; transform: scale(1.06); }
     .part-copy-btn.copied { background: var(--mint-dk); color: white; }
+
+    /* ── STRIPES ── */
+    #stripes-section { border-top: 2px solid var(--border); padding-top: 12px; margin-top: 8px; }
+    #stripes-section-label {
+      font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.8px;
+      color: var(--text-lt); font-weight: 700; margin-bottom: 8px;
+    }
+    .stripe-row {
+      display: flex; align-items: center; gap: 7px;
+      padding: 6px 0; border-bottom: 1.5px solid var(--border);
+    }
+    .stripe-row:last-child { border-bottom: none; }
+    .stripe-color-input {
+      width: 34px; height: 28px; border: 2px solid var(--border); border-radius: 8px;
+      cursor: pointer; padding: 2px; background: white; flex-shrink: 0;
+    }
+    .stripe-sliders { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+    .stripe-slider-row { display: flex; align-items: center; gap: 6px; }
+    .stripe-pos-input, .stripe-wid-input { flex: 1; accent-color: var(--lav-dk); }
+    .stripe-pos-val, .stripe-wid-val { font-size: 0.75rem; color: var(--lav-dk); font-weight: 800; min-width: 32px; text-align: right; }
+    .stripe-del { background: none; border: none; cursor: pointer; color: var(--text-lt); font-size: 0.9rem; padding: 0 2px; line-height: 1; transition: color 0.12s; }
+    .stripe-del:hover { color: #e07070; }
+    #btn-add-stripe {
+      width: 100%; margin-top: 8px; padding: 8px; border-radius: var(--radius-pill);
+      background: var(--lavender); border: none; color: var(--text-mid);
+      font-family: inherit; font-size: 0.8rem; font-weight: 800; cursor: pointer;
+      transition: background 0.13s, color 0.13s;
+    }
+    #btn-add-stripe:hover { background: var(--lav-dk); color: white; }
+
+    /* ── MOBILE ── */
+    .proj-pattern-btn {
+      display: none; /* shown only on mobile via media query */
+      align-items: center; justify-content: center;
+      background: none; border: none; cursor: pointer;
+      font-size: 1rem; padding: 2px 4px; opacity: 0.7;
+      flex-shrink: 0;
+    }
+    .proj-pattern-btn:hover { opacity: 1; }
+
+    /* Landscape warning modal */
+    #landscape-warn-box {
+      background: var(--panel-bg); border-radius: var(--radius-lg); padding: 28px 26px 22px;
+      width: 320px; max-width: 88vw;
+      box-shadow: var(--shadow-lg); border: 2px solid var(--border);
+      text-align: center; animation: pop-in 0.18s ease;
+    }
+    #landscape-warn-icon { font-size: 2rem; margin-bottom: 8px; }
+    #landscape-warn-msg {
+      font-size: 0.88rem; color: var(--text-mid); line-height: 1.7;
+      font-weight: 600; margin-bottom: 20px;
+    }
+    #landscape-warn-ok {
+      padding: 10px 32px;
+      background: linear-gradient(135deg, var(--blush-dk), var(--lav-dk));
+      color: white; border: none; border-radius: var(--radius-pill);
+      font-size: 0.92rem; font-weight: 800; cursor: pointer;
+      font-family: 'Baloo 2', sans-serif;
+      box-shadow: 0 4px 14px rgba(196,130,200,0.3);
+      transition: transform 0.14s, box-shadow 0.14s;
+    }
+    #landscape-warn-ok:hover { transform: scale(1.05); }
+    #landscape-warn-ok:active { transform: scale(0.97); }
+    #landscape-warn-dismiss-row {
+      display: flex; align-items: center; justify-content: center; gap: 7px;
+      margin-top: 14px; font-size: 0.82rem; font-weight: 600;
+      color: var(--text-lt); cursor: pointer;
+    }
+    #landscape-warn-dismiss { accent-color: var(--lav-dk); cursor: pointer; }
+
+    #mobile-nav { display: none; } /* shown only on mobile */
+    .mob-tab {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 2px; border: none; background: none;
+      font-family: inherit; color: var(--text-lt);
+      font-size: 0.65rem; font-weight: 800; cursor: pointer;
+      padding: 6px 0; -webkit-tap-highlight-color: transparent;
+    }
+    .mob-tab-icon { font-size: 1.3rem; line-height: 1; }
+    .mob-tab.mob-active { color: var(--lav-dk); }
+
+    /* Hide home columns only on narrow portrait screens */
+    @media (max-width: 700px) {
+      .home-col { display: none !important; }
+    }
+
+    /* Landscape phone: thinner panels + scaled home screen */
+    @media (max-height: 500px) and (orientation: landscape) and (max-width: 1024px) {
+      /* Editor */
+      #editor-view {
+        grid-template-columns: 150px 1fr 165px;
+        grid-template-rows: var(--app-h, 100vh);
+      }
+      /* Scale everything inside panels to fit the thinner columns */
+      .panel { font-size: 0.72rem; }
+      .panel-header { padding: 8px 10px 6px; font-size: 0.78rem; }
+      .ctrl-row label { font-size: 0.7rem; }
+      .range-row input[type=range] { height: 14px; }
+      .ctrl-btn, #btn-deselect, #btn-add-stripe,
+      #btn-new, #btn-select-mode, #btn-delete-selected,
+      #btn-add-part, #btn-undo-panel { padding: 6px 10px; font-size: 0.7rem; }
+      .extra-part-item, .project-item { padding: 6px 8px; font-size: 0.72rem; }
+      #name-row input { font-size: 0.72rem; padding: 5px 8px; }
+      #name-row button { padding: 5px 8px; font-size: 0.72rem; }
+
+      .catalog-item { padding: 6px 4px; }
+      .cat-label { font-size: 0.6rem; }
+      #hint { bottom: 8px; font-size: 0.7rem; padding: 5px 14px; }
+
+      /* Home screen: scrollable flex column so content never clips */
+      #homepage { overflow-y: auto; overflow-x: hidden; display: flex !important; flex-direction: column; align-items: center; justify-content: center; min-height: var(--app-h, 100vh); }
+      .home-col { padding: 6px 0; zoom: 0.6; }
+      #home-right { position: relative; top: auto; left: auto; transform: none; padding: 14px 0; zoom: 0.72; }
+      #home-subtitle { margin-bottom: 10px; }
+      #home-buttons { gap: 6px; }
+    }
+
+    @media (max-width: 700px) {
+      /* Editor active: flex column filling screen above tab bar */
+      #editor-view.active {
+        display: flex; flex-direction: column;
+        position: fixed; top: 0; left: 0; right: 0;
+        height: calc(var(--app-h, 100vh) - 68px);
+      }
+
+      /* Panels hidden by default, overlaid as full-screen when shown */
+      #panel-left, #panel-right {
+        display: none; position: fixed;
+        top: 0; left: 0; right: 0;
+        height: calc(var(--app-h, 100vh) - 68px);
+        z-index: 50; border: none !important;
+        overflow-y: auto; overflow-x: hidden;
+        box-shadow: var(--shadow);
+      }
+      .mob-panel-show { display: flex !important; }
+
+      /* Canvas fills the editor's flex space */
+      #canvas-wrap { flex: 1; min-height: 0; position: relative; }
+
+      /* Touch support for canvas gestures */
+      #canvas-wrap canvas { touch-action: none; }
+
+
+      /* Mobile tab bar — sits at bottom of visible area, respects home indicator */
+      #mobile-nav {
+        display: flex !important;
+        position: fixed; left: 0; right: 0; z-index: 100;
+        bottom: 0;
+        top: calc(var(--app-h, 100vh) - 68px);
+        height: 68px;
+        background: white; border-top: 2px solid var(--border);
+        box-shadow: 0 -2px 12px rgba(180,120,160,0.10);
+      }
+
+      /* Float button replaced by inline button on mobile */
+      #view-pattern-float-btn { display: none !important; }
+      .proj-pattern-btn { display: flex !important; }
+      .project-item .del-btn { opacity: 1; }
+
+      /* Pattern doc: full width, back button inside overlay */
+      #pattern-doc-overlay { padding: 8px; align-items: flex-start; padding-top: 52px; }
+      #pattern-doc-wrapper { width: 100% !important; max-width: 100% !important; }
+      #btn-back-to-editor {
+        position: fixed !important;
+        right: auto !important; left: 12px !important; top: 8px !important;
+        z-index: 10000;
+      }
+
+      /* Subscreen headers wrap on small widths */
+      .subscreen-header { flex-wrap: wrap; gap: 8px; padding: 14px 16px; }
+
+      /* Name row: input on its own line, buttons below */
+      #name-row { flex-wrap: wrap; }
+      /* font-size >= 16px prevents iOS Safari from auto-zooming on focus */
+      #project-name { flex-basis: 100%; font-size: 16px; }
+
+      /* Panel scrolling: prevent flex-shrink from compressing content */
+      #panel-left > *, #panel-right > * { flex-shrink: 0; }
+      /* Project list scrolls within its flex slot */
+      #project-list { overflow-y: auto; min-height: 0; flex-shrink: 1; }
+      /* Catalog overlay: scrollable on small screens */
+      #catalog-panel { max-height: calc(var(--app-h, 100vh) - 40px); overflow-y: auto; }
+    }
   </style>
 </head>
 <body>
@@ -974,7 +1222,7 @@
       <div id="home-subtitle">design your own crochet plushies</div>
       <div id="home-buttons">
         <button class="home-btn home-btn-primary" id="btn-go-editor">
-          <span class="btn-icon">✏️</span> <span id="editor-btn-label">Edit Plushies</span>
+          <span class="btn-icon">✏️</span> <span id="editor-btn-label">Build Plushies</span>
         </button>
         <button class="home-btn home-btn-secondary" id="btn-go-patterns">
           <span class="btn-icon">🧶</span> Patterns
@@ -1128,7 +1376,9 @@
   <!-- CENTER: canvas -->
   <div id="canvas-wrap">
     <canvas id="canvas"></canvas>
+    <button id="btn-home">🏠 Home</button>
     <div id="hint">🖱 Click to select · Drag to move · Scroll to zoom</div>
+    <script>if ('ontouchstart' in window) document.getElementById('hint').textContent = '👆 Tap to select · Drag to move · Pinch to zoom';</script>
     <div id="drag-hint">Moving part — release to place</div>
   </div>
 
@@ -1183,7 +1433,12 @@
             <span class="range-val" id="limb-width-val">1.0×</span>
           </div>
         </div>
-        <button id="btn-deselect"   class="ctrl-btn">Deselect</button>
+        <button id="btn-deselect" class="ctrl-btn">Deselect</button>
+        <div id="stripes-section" style="display:none">
+          <div id="stripes-section-label">Stripes</div>
+          <div id="stripes-list"></div>
+          <button id="btn-add-stripe">＋ Add Stripe</button>
+        </div>
       </div>
 
       <div id="no-selection">Click a part on the plushie to edit it</div>
@@ -1198,6 +1453,19 @@
     </div>
   </div>
 
+  <!-- MOBILE BOTTOM NAV (hidden on desktop) -->
+  <nav id="mobile-nav">
+    <button class="mob-tab" id="mob-tab-plushies">
+      <span class="mob-tab-icon">🧸</span><span>Plushies</span>
+    </button>
+    <button class="mob-tab mob-active" id="mob-tab-canvas">
+      <span class="mob-tab-icon">🎨</span><span>Canvas</span>
+    </button>
+    <button class="mob-tab" id="mob-tab-edit">
+      <span class="mob-tab-icon">✏️</span><span>Edit</span>
+    </button>
+  </nav>
+
   </div><!-- /#editor-view -->
 
   <!-- PATTERNS SCREEN -->
@@ -1206,6 +1474,7 @@
       <button class="subscreen-back" id="btn-patterns-back">← Back</button>
       <span class="subscreen-title">🧶 Patterns</span>
       <button class="subscreen-back" id="btn-new-crocheter">New crocheter?</button>
+      <button class="subscreen-back btn-create-pattern" id="btn-patterns-to-editor">✨ Create Pattern</button>
     </div>
     <div class="subscreen-body">
       <div id="patterns-grid"></div>
@@ -1283,6 +1552,8 @@
 
   <!-- PATTERN DOCUMENT MODAL -->
   <div id="pattern-doc-overlay">
+    <div id="pattern-doc-wrapper">
+    <button id="btn-back-to-editor" style="display:none"><span>←</span><span>Back</span></button>
     <div id="pattern-doc-panel">
       <div id="pattern-doc-header">
         <div id="pattern-doc-title-row">
@@ -1300,6 +1571,7 @@
       </div>
       <div id="pattern-doc-body"></div>
     </div>
+    </div>
   </div>
 
   <!-- PATTERNS NOTE MODAL -->
@@ -1308,6 +1580,23 @@
       <div id="patterns-note-title">📋 NOTE</div>
       <p id="patterns-note-msg">This app is still in testing so patterns may be larger, smaller, or a slightly different shape than expected, and do note that size of the final plushie heavily depends on yarn and hook size. Scaling pattern with size is still in development, we thank you for your understanding.</p>
       <button id="patterns-note-ok">OK</button>
+      <label id="patterns-note-dismiss-row">
+        <input type="checkbox" id="patterns-note-dismiss" />
+        Don't show again
+      </label>
+    </div>
+  </div>
+
+  <!-- Landscape warning modal (mobile portrait only) -->
+  <div id="landscape-warn-overlay" class="modal-overlay">
+    <div id="landscape-warn-box">
+      <div id="landscape-warn-icon">📱↔️</div>
+      <p id="landscape-warn-msg">Plushie Builder works better horizontally! Rotate your phone for the best experience.</p>
+      <button id="landscape-warn-ok">OK</button>
+      <label id="landscape-warn-dismiss-row">
+        <input type="checkbox" id="landscape-warn-dismiss" />
+        Don't show again
+      </label>
     </div>
   </div>
 
@@ -1322,9 +1611,8 @@
   </div>
 
   <div id="toast"></div>
+  <button id="view-pattern-float-btn">🧶 View Pattern</button>
 
-  <!-- Home button: always in DOM, non-editor screens cover it via z-index -->
-  <button id="btn-home">🏠 Home</button>
   <!-- Non-module script so goHome is synchronously available on click -->
   <script>
     function __goHome() {
@@ -1386,6 +1674,9 @@
     ];
     const CATALOG_HEMI  = new Set(CATALOG.filter(c => c.shape === 'hemi').map(c => c.id));
     const CATALOG_SMILE = new Set(CATALOG.filter(c => c.shape === 'smile').map(c => c.id));
+
+    // Reset note dismiss on every reload (for testing)
+    localStorage.removeItem('plushie-note-dismissed');
 
     // ═══════════════════════════════════════
     // PROJECT STORE
@@ -1629,6 +1920,7 @@
     controls.zoomSpeed     = 3;
     controls.minDistance   = 3;
     controls.maxDistance   = 14;
+    controls.enablePan     = false;
     controls.target.set(0, 0.3, 0);
 
     scene.add(new THREE.AmbientLight(0xffeeff, 1.2));
@@ -1908,6 +2200,75 @@
       return g;
     })();
 
+    // ── STRIPE HELPERS ──────────────────────────────────────────────────────────
+    function getPartStripes(partId) {
+      const proj = currentProject();
+      if (!proj) return [];
+      return (PART_IDS.includes(partId) ? proj.parts[partId] : getEP(partId))?.stripes ?? [];
+    }
+    function setPartStripes(partId, stripes) {
+      const proj = currentProject();
+      if (!proj) return;
+      const target = PART_IDS.includes(partId) ? proj.parts[partId] : getEP(partId);
+      if (target) target.stripes = stripes;
+    }
+    function clearPartStripes(partId) {
+      const mesh = meshMap[partId];
+      if (!mesh) return;
+      [...mesh.children].filter(c => c.userData.isStripe).forEach(c => {
+        c.geometry.dispose(); c.material.dispose(); mesh.remove(c);
+      });
+    }
+    function stripeGeo(y, halfW = 0.09) {
+      const theta  = Math.acos(Math.max(-0.999, Math.min(0.999, y)));
+      const start  = Math.max(0, theta - halfW);
+      const length = Math.min(halfW * 2, Math.PI - start);
+      return new THREE.SphereGeometry(1.006, 32, 16, 0, Math.PI * 2, start, length);
+    }
+    function loafStripeGeo(xPos, halfW = 0.09) {
+      // Build a profile that follows the capsule surface: cylinder (r=1) in the
+      // middle (|x|<=0.3) and hemispheres on each end. LatheGeometry revolves it
+      // around Y; applyMatrix4 then rotates the whole thing so Y→X.
+      const segs = 16;
+      const points = [];
+      for (let i = 0; i <= segs; i++) {
+        const x = xPos - halfW + (i / segs) * halfW * 2;
+        const d = Math.max(0, Math.abs(x) - 0.3);
+        const r = Math.sqrt(Math.max(0.001, 1.0 - d * d)) + 0.006;
+        points.push(new THREE.Vector2(r, -x)); // negate so Z-rotation maps y→x correctly
+      }
+      const g = new THREE.LatheGeometry(points, 32);
+      g.applyMatrix4(new THREE.Matrix4().makeRotationZ(Math.PI / 2));
+      return g;
+    }
+    function activeStripeGeo(pos, halfW) {
+      const proj = currentProject();
+      const isLoaf = selectedId === 'body' && (proj?.bodyShape === 'loaf' || proj?.bodyShape === 'bee');
+      return isLoaf ? loafStripeGeo(pos, halfW) : stripeGeo(pos, halfW);
+    }
+    function renderPartStripes(partId) {
+      clearPartStripes(partId);
+      const mesh = meshMap[partId];
+      if (!mesh || !mesh.visible) return;
+      const proj = currentProject();
+      const isLoafBody = partId === 'body' && (proj?.bodyShape === 'loaf' || proj?.bodyShape === 'bee');
+      getPartStripes(partId).forEach(stripe => {
+        const pos = stripe.position ?? 0;
+        const halfW = stripe.width ?? 0.09;
+        const geo = isLoafBody ? loafStripeGeo(pos, halfW) : stripeGeo(pos, halfW);
+        const mat = new THREE.MeshToonMaterial({
+          color: new THREE.Color(stripe.color ?? '#ffffff'),
+          gradientMap: toonGrad, side: THREE.FrontSide,
+          polygonOffset: true, polygonOffsetFactor: -3, polygonOffsetUnits: -4
+        });
+        const m = new THREE.Mesh(geo, mat);
+        m.userData.isStripe = true;
+        m.userData.stripeId = stripe.id;
+        m.castShadow = false;
+        mesh.add(m);
+      });
+    }
+
     const meshMap      = {}; // partId → Mesh
     const outlineMeshes = {}; // partId → outline Mesh
 
@@ -2133,6 +2494,7 @@ const _snapRay = new THREE.Raycaster();
       });
 
       plushieGroup.updateWorldMatrix(true, true);
+      PART_DEFS.forEach(def => renderPartStripes(def.id));
 
       // If loaf/whale body, head must not be selectable
       if ((proj.bodyShape === 'loaf' || proj.bodyShape === 'bee' || proj.bodyShape === 'whale') && selectedId === 'head') {
@@ -2167,6 +2529,7 @@ const _snapRay = new THREE.Raycaster();
       addPartMesh(ep.id, geo, ep.color);
       const mesh = meshMap[ep.id];
       if (ep.catalogId === 'snout') addSnoutNostrils(mesh);
+      renderPartStripes(ep.id);
       if (cat.noShadow) mesh.castShadow = false;
       if (cat.doubleSide) mesh.material.side = THREE.DoubleSide;
       const s  = ep.size || 1;
@@ -2320,7 +2683,7 @@ const _snapRay = new THREE.Raycaster();
         const item = document.createElement('div');
         item.className = 'extra-part-item' + (def.id === selectedId ? ' active' : '');
         item.innerHTML = `<span class="ep-name">${def.label}</span>`;
-        item.querySelector('.ep-name').addEventListener('click', () => selectPart(def.id));
+        item.addEventListener('click', () => selectPart(def.id));
         list.appendChild(item);
       });
 
@@ -2330,7 +2693,7 @@ const _snapRay = new THREE.Raycaster();
         const item = document.createElement('div');
         item.className = 'extra-part-item' + (ep.id === selectedId ? ' active' : '');
         item.innerHTML = `<span class="ep-name">${ep.label ?? cat?.label}</span><button class="ep-del">✕</button>`;
-        item.querySelector('.ep-name').addEventListener('click', () => selectPart(ep.id));
+        item.addEventListener('click', () => selectPart(ep.id));
         item.querySelector('.ep-del').addEventListener('click', e => { e.stopPropagation(); removeExtraPart(ep.id); });
         list.appendChild(item);
       });
@@ -2341,7 +2704,7 @@ const _snapRay = new THREE.Raycaster();
           const item = document.createElement('div');
           item.className = 'extra-part-item' + (sid === selectedId ? ' active' : '');
           item.innerHTML = `<span class="ep-name">Stripe ${i + 1}</span>`;
-          item.querySelector('.ep-name').addEventListener('click', () => selectPart(sid));
+          item.addEventListener('click', () => selectPart(sid));
           list.appendChild(item);
         });
       }
@@ -2370,8 +2733,11 @@ const _snapRay = new THREE.Raycaster();
       mouse.x =  ((event.clientX - rect.left) / rect.width)  * 2 - 1;
       mouse.y = -((event.clientY - rect.top)  / rect.height) * 2 + 1;
       raycaster.setFromCamera(mouse, camera);
-      const hits = raycaster.intersectObjects(allMeshes());
-      return hits.length ? hits[0].object.userData.partId : null;
+      const hits = raycaster.intersectObjects(allMeshes(), true);
+      if (!hits.length) return null;
+      const obj = hits[0].object;
+      if (obj.userData.isStripe) return obj.parent?.userData.partId ?? null;
+      return obj.userData.partId ?? null;
     }
 
     function selectPart(id) {
@@ -2598,7 +2964,7 @@ function getEmbedFactor(id) {
     canvas.addEventListener('pointerdown', e => {
       if (e.button !== 0) return;
       const id = getMouseIntersect(e);
-      if (!id) { selectPart(null); return; }
+      if (!id) return;
       drag.partId = id; drag.startX = e.clientX;
       drag.startY = e.clientY; drag.active = false; drag.pointerId = e.pointerId;
       e.stopPropagation();
@@ -2644,9 +3010,10 @@ function getEmbedFactor(id) {
     window.addEventListener('pointerup', e => {
       if (drag.pointerId === null || e.pointerId !== drag.pointerId) return;
       const was = drag.active, pid = drag.partId;
+      const moved = Math.hypot(e.clientX - drag.startX, e.clientY - drag.startY);
       drag.active = false; drag.partId = null; drag.pointerId = null;
       dragHintEl.classList.remove('show');
-      if (!was && pid) selectPart(pid);
+      if (!was && pid && moved < 8) selectPart(pid);
     });
 
     canvas.addEventListener('pointermove', e => {
@@ -2675,6 +3042,7 @@ function getEmbedFactor(id) {
       if (!selectedId || !currentProject()) {
         partControls.style.display = 'none';
         noSelection.style.display  = 'block';
+        document.getElementById('stripes-section').style.display = 'none';
         return;
       }
       partControls.style.display = 'flex';
@@ -2704,7 +3072,8 @@ function getEmbedFactor(id) {
         rotationInput.value = deg;
         rotationVal.textContent = deg + '°';
         rotationRow.style.display = '';
-        if (ep.catalogId === 'limb') {
+        const isArm = ep.catalogId === 'limb' && ep.label?.toLowerCase().includes('arm');
+        if (ep.catalogId === 'limb' && !isArm) {
           limbControlsEl.style.display = '';
           const ll = ep.limbLength ?? 1, lw = ep.limbWidth ?? 1;
           document.getElementById('limb-length').value = ll;
@@ -2726,6 +3095,7 @@ function getEmbedFactor(id) {
         limbControlsEl.style.display = 'none';
       }
       renderPalette();
+      renderStripeUI();
     }
 
     const paletteEl = document.getElementById('color-palette');
@@ -2940,6 +3310,85 @@ function getEmbedFactor(id) {
     });
 
     document.getElementById('btn-deselect').addEventListener('click', () => selectPart(null));
+
+    // ── STRIPE UI ────────────────────────────────────────────────────────────
+    function renderStripeUI() {
+      const section = document.getElementById('stripes-section');
+      const list    = document.getElementById('stripes-list');
+      const proj = currentProject();
+      const isAllowed = selectedId && proj &&
+        proj.bodyShape === 'normal' &&
+        (selectedId === 'head' || selectedId === 'body' ||
+         getEP(selectedId)?.catalogId === 'limb');
+      if (!isAllowed) { section.style.display = 'none'; return; }
+      section.style.display = '';
+      list.innerHTML = '';
+      getPartStripes(selectedId).forEach(stripe => {
+        const pct    = Math.round(((stripe.position ?? 0) + 1.0) / 2.0 * 100);
+        const widVal = Math.round((stripe.width ?? 0.09) * 100);
+        const row = document.createElement('div');
+        row.className = 'stripe-row';
+        row.innerHTML = `
+          <input type="color" class="stripe-color-input" value="${stripe.color ?? '#ffffff'}" />
+          <div class="stripe-sliders">
+            <div class="stripe-slider-row">
+              <input type="range" class="stripe-pos-input" min="0" max="100" step="1" value="${pct}" />
+              <span class="stripe-pos-val">${pct}%</span>
+            </div>
+            <div class="stripe-slider-row">
+              <input type="range" class="stripe-wid-input" min="2" max="100" step="1" value="${widVal}" />
+              <span class="stripe-wid-val">${widVal}</span>
+            </div>
+          </div>
+          <button class="stripe-del" title="Remove stripe">✕</button>`;
+        const colorIn = row.querySelector('.stripe-color-input');
+        const posIn   = row.querySelector('.stripe-pos-input');
+        const posVal  = row.querySelector('.stripe-pos-val');
+        const widIn   = row.querySelector('.stripe-wid-input');
+        const widLbl  = row.querySelector('.stripe-wid-val');
+        colorIn.addEventListener('pointerdown', () => pushUndo());
+        colorIn.addEventListener('input', () => {
+          stripe.color = colorIn.value;
+          const sm = meshMap[selectedId]?.children.find(c => c.userData.stripeId === stripe.id);
+          if (sm) sm.material.color.set(stripe.color);
+          saveStore();
+        });
+        posIn.addEventListener('pointerdown', () => pushUndo());
+        posIn.addEventListener('input', () => {
+          stripe.position = (parseInt(posIn.value) / 100) * 2.0 - 1.0;
+          posVal.textContent = posIn.value + '%';
+          const sm = meshMap[selectedId]?.children.find(c => c.userData.stripeId === stripe.id);
+          if (sm) { sm.geometry.dispose(); sm.geometry = activeStripeGeo(stripe.position, stripe.width ?? 0.09); }
+          saveStore();
+        });
+        widIn.addEventListener('pointerdown', () => pushUndo());
+        widIn.addEventListener('input', () => {
+          stripe.width = parseInt(widIn.value) / 100;
+          widLbl.textContent = widIn.value;
+          const sm = meshMap[selectedId]?.children.find(c => c.userData.stripeId === stripe.id);
+          if (sm) { sm.geometry.dispose(); sm.geometry = activeStripeGeo(stripe.position ?? 0, stripe.width); }
+          saveStore();
+        });
+        row.querySelector('.stripe-del').addEventListener('click', () => {
+          pushUndo();
+          setPartStripes(selectedId, getPartStripes(selectedId).filter(s => s.id !== stripe.id));
+          renderPartStripes(selectedId);
+          renderStripeUI();
+          saveStore();
+        });
+        list.appendChild(row);
+      });
+    }
+
+    document.getElementById('btn-add-stripe').addEventListener('click', () => {
+      if (!selectedId) return;
+      pushUndo();
+      const stripes = [...getPartStripes(selectedId), { id: uid(), color: '#000000', position: 0, width: 0.09 }];
+      setPartStripes(selectedId, stripes);
+      renderPartStripes(selectedId);
+      renderStripeUI();
+      saveStore();
+    });
 
     const limbLengthInput = document.getElementById('limb-length');
     const limbLengthVal   = document.getElementById('limb-length-val');
@@ -3381,6 +3830,26 @@ function getEmbedFactor(id) {
     // ═══════════════════════════════════════
     // PROJECT PANEL
     // ═══════════════════════════════════════
+    const floatPatternBtn = document.getElementById('view-pattern-float-btn');
+    document.addEventListener('click', e => {
+      if (!floatPatternBtn.contains(e.target)) floatPatternBtn.style.display = 'none';
+    });
+    document.addEventListener('mousemove', e => {
+      if (floatPatternBtn.style.display === 'none') return;
+      const r  = floatPatternBtn.getBoundingClientRect();
+      const dx = Math.max(r.left - e.clientX, 0, e.clientX - r.right);
+      const dy = Math.max(r.top  - e.clientY, 0, e.clientY - r.bottom);
+      if (Math.sqrt(dx * dx + dy * dy) > 80) floatPatternBtn.style.display = 'none';
+    });
+    floatPatternBtn.addEventListener('click', () => {
+      const proj = floatPatternBtn._proj;
+      floatPatternBtn.style.display = 'none';
+      if (!proj) return;
+      showScreen('patterns-screen');
+      populatePatternsScreen();
+      openPatternDoc(proj, true);
+    });
+
     let selectMode = false;
     const selectedProjectIds = new Set();
 
@@ -3406,6 +3875,7 @@ function getEmbedFactor(id) {
         item.innerHTML = `
           <span class="select-check">${isSelected ? '✓' : ''}</span>
           <span style="flex:1">${p.name}</span>
+          <button class="proj-pattern-btn" title="View Pattern">🧶</button>
           <button class="del-btn">✕</button>`;
         if (selectMode) {
           item.addEventListener('click', () => {
@@ -3414,12 +3884,38 @@ function getEmbedFactor(id) {
             renderProjectList();
           });
         } else {
-          item.querySelector('span[style]').addEventListener('click', () => switchProject(p.id));
+          item.addEventListener('click', () => switchProject(p.id));
+          item.querySelector('.proj-pattern-btn').addEventListener('click', e => {
+            e.stopPropagation();
+            showScreen('patterns-screen');
+            populatePatternsScreen();
+            openPatternDoc(p, true);
+          });
           item.querySelector('.del-btn').addEventListener('click', e => { e.stopPropagation(); deleteProject(p.id); });
+          item.addEventListener('mouseenter', () => {
+            const rect = item.getBoundingClientRect();
+            floatPatternBtn.style.top  = (rect.top + rect.height / 2 - 20) + 'px';
+            floatPatternBtn.style.left = (rect.right + 22) + 'px';
+            floatPatternBtn.style.display = 'block';
+            floatPatternBtn._proj = p;
+          });
         }
         list.appendChild(item);
       });
     }
+
+    // ── Mobile tab navigation ──
+    function isMobile() { return window.innerWidth <= 700; }
+    function setMobTab(tab) {
+      document.getElementById('panel-left').classList.toggle('mob-panel-show', tab === 'plushies');
+      document.getElementById('panel-right').classList.toggle('mob-panel-show', tab === 'edit');
+      document.querySelectorAll('.mob-tab').forEach(b => b.classList.remove('mob-active'));
+      document.getElementById(`mob-tab-${tab}`).classList.add('mob-active');
+      if (tab === 'canvas') resize();
+    }
+    document.getElementById('mob-tab-plushies').addEventListener('click', () => setMobTab('plushies'));
+    document.getElementById('mob-tab-canvas').addEventListener('click',   () => setMobTab('canvas'));
+    document.getElementById('mob-tab-edit').addEventListener('click',     () => setMobTab('edit'));
 
     document.getElementById('btn-select-mode').addEventListener('click', () => setSelectMode(!selectMode));
 
@@ -3451,6 +3947,7 @@ function getEmbedFactor(id) {
       applyProject(currentProject());
       updateControls(); updateEmissive(); updateWhaleUI();
       renderProjectList(); renderExtraList();
+      if (isMobile()) setMobTab('canvas');
     }
 
     const nameConfirmBtn = document.getElementById('btn-name-confirm');
@@ -3473,6 +3970,7 @@ function getEmbedFactor(id) {
     document.getElementById('project-name').addEventListener('keydown', e => {
       if (e.key === 'Enter') { e.preventDefault(); confirmName(); }
     });
+    document.getElementById('project-name').addEventListener('blur', confirmName);
     nameConfirmBtn.addEventListener('click', confirmName);
 
     document.getElementById('btn-undo').addEventListener('click', undo);
@@ -3623,12 +4121,26 @@ function getEmbedFactor(id) {
       document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
       document.getElementById(id).classList.add('active');
       document.getElementById('btn-home').style.display = id === 'editor-view' ? 'block' : 'none';
+      if (id === 'editor-view') maybeShowLandscapeWarn();
     }
+
+    function maybeShowLandscapeWarn() {
+      if (localStorage.getItem('landscape-warn-dismissed')) return;
+      if (!('ontouchstart' in window)) return;           // desktop: skip
+      if (window.innerWidth > window.innerHeight) return; // already landscape: skip
+      document.getElementById('landscape-warn-overlay').classList.add('show');
+    }
+    document.getElementById('landscape-warn-ok').addEventListener('click', () => {
+      if (document.getElementById('landscape-warn-dismiss').checked) {
+        localStorage.setItem('landscape-warn-dismissed', '1');
+      }
+      document.getElementById('landscape-warn-overlay').classList.remove('show');
+    });
     window.__goHome = () => showScreen('homepage');
 
     function updateEditorBtnLabel() {
       const hasProjects = projects.length > 0;
-      document.getElementById('editor-btn-label').textContent = hasProjects ? 'Edit Plushies' : 'New Plushie';
+      document.getElementById('editor-btn-label').textContent = hasProjects ? 'Build Plushies' : 'New Plushie';
     }
 
     function showHomepage() {
@@ -3641,11 +4153,54 @@ function getEmbedFactor(id) {
     // ═══════════════════════════════════════
     const patternOverlay = document.getElementById('pattern-doc-overlay');
     document.getElementById('btn-close-pattern').addEventListener('click', () => patternOverlay.classList.remove('show'));
+    document.getElementById('btn-back-to-editor').addEventListener('click', () => {
+      patternOverlay.classList.remove('show');
+      showScreen('editor-view');
+    });
     patternOverlay.addEventListener('click', e => { if (e.target === patternOverlay) patternOverlay.classList.remove('show'); });
 
     const BODY_SHAPE_LABELS = { normal:'Classic Doll', loaf:'Cat Loaf', whale:'Round Whale', bee:'Bee' };
 
     const PART_PATTERNS = {
+      bee_body: `R1: 6 sc in MR (6)
+R2: inc around (12)
+R3: [sc, inc] x6 (18)
+R4: [2 sc, inc] x6 (24)
+R5: [3 sc, inc] x6 (30)
+R6: [4 sc, inc] x6 (36)
+R7: [5 sc, inc] x6 (42)
+R8–9: sc around (42)
+Change to black.
+R10–11: sc around (42)
+Change to yellow.
+R12–13: sc around (42)
+Change to black.
+R14–15: sc around (42)
+Change to yellow.
+R16–17: sc around (42)
+R18: [5 sc, dec] x6 (36)
+R19: [4 sc, dec] x6 (30)
+R20: [3 sc, dec] x6 (24)
+R21: [2 sc, dec] x6 (18)
+R22: [sc, dec] x6 (12)
+Stuff firmly.
+FO, leave a long tail for sewing.`,
+      wing: `R1: 6 sc in MR (6)
+R2: inc around (12)
+R3: [sc, inc] x6 (18)
+R4: [2 sc, inc] x6 (24)
+R5: [3 sc, inc] x6 (30)
+FO, leave a long tail for sewing.`,
+      cattail: `R1: 6 SC in magic ring (6)
+R2+: SC around (6)
+Optional: Lightly stuff as you go
+FO when your tail reaches the desired length, leaving a long tail for sewing.`,
+      catear: `Ch 5
+Row 1: SC in 2nd ch from hook and across (4)
+Row 2: Ch 1, turn. Dec, SC 2 (3)
+Row 3: Ch 1, turn. Dec, SC 1 (2)
+Row 4: Ch 1, turn. Dec (1)
+FO, leaving a tail for sewing.`,
       head: `R1: 6 sc in MR (6)
 R2: inc around (12)
 R3: [sc, inc] x6 (18)
@@ -3746,7 +4301,8 @@ FO, leave a long tail for sewing.`,
         const state = proj.parts[def.id];
         if (!state || state.hidden) return;
         if ((proj.bodyShape === 'loaf' || proj.bodyShape === 'bee' || proj.bodyShape === 'whale') && def.id === 'head') return;
-        addRow(def.label, state.color, `Size: ${(state.size || 1).toFixed(2)}×`, def.id);
+        const patternKey = def.id === 'body' && proj.bodyShape === 'bee' ? 'bee_body' : def.id;
+        addRow(def.label, state.color, `Size: ${(state.size || 1).toFixed(2)}×`, patternKey);
       });
       if (proj.bodyShape === 'bee' && proj.beeStripeColors) {
         proj.beeStripeColors.forEach((col, i) => addRow(`Stripe ${i + 1}`, col, ''));
@@ -3808,7 +4364,10 @@ FO, leave a long tail for sewing.`,
       (proj.extraParts ?? []).forEach(ep => {
         if (ep.catalogId === 'eye' || ep.catalogId === 'nose' || ep.catalogId === 'catnose') return;
         const cat = CATALOG.find(c => c.id === ep.catalogId);
-        add(ep.color, ep.label ?? cat?.label ?? ep.catalogId);
+        const label = ep.catalogId === 'mouth'
+          ? 'Smile (thin yarn)'
+          : (ep.label ?? cat?.label ?? ep.catalogId);
+        add(ep.color, label);
       });
 
       section('Yarn Colors');
@@ -3850,10 +4409,11 @@ FO, leave a long tail for sewing.`,
       entry('FO',     'Fasten off');
     }
 
-    function openPatternDoc(proj) {
+    function openPatternDoc(proj, fromEditor = false) {
       patternDocProj = proj;
       patternDocTab  = 'parts';
       document.getElementById('pattern-doc-title').textContent = `🧶 ${proj.name || 'Untitled'}`;
+      document.getElementById('btn-back-to-editor').style.display = fromEditor ? '' : 'none';
       renderPatternTab();
       patternOverlay.classList.add('show');
     }
@@ -4009,13 +4569,19 @@ FO, leave a long tail for sewing.`,
     document.getElementById('btn-go-patterns').addEventListener('click', () => {
       showScreen('patterns-screen');
       populatePatternsScreen();
-      document.getElementById('patterns-note-overlay').classList.add('show');
+      if (!localStorage.getItem('plushie-note-dismissed')) {
+        document.getElementById('patterns-note-overlay').classList.add('show');
+      }
     });
     document.getElementById('patterns-note-ok').addEventListener('click', () => {
+      if (document.getElementById('patterns-note-dismiss').checked) {
+        localStorage.setItem('plushie-note-dismissed', '1');
+      }
       document.getElementById('patterns-note-overlay').classList.remove('show');
     });
     document.getElementById('btn-go-help').addEventListener('click',      () => showScreen('help-screen'));
     document.getElementById('btn-patterns-back').addEventListener('click',   () => showHomepage());
+    document.getElementById('btn-patterns-to-editor').addEventListener('click', () => showScreen('editor-view'));
     document.getElementById('btn-help-back').addEventListener('click',       () => showHomepage());
     document.getElementById('btn-new-crocheter').addEventListener('click',   () => showScreen('newcrocheter-screen'));
     document.getElementById('btn-newcrocheter-back').addEventListener('click',() => showScreen('patterns-screen'));
